@@ -2,25 +2,29 @@ import React from 'react';
 import styled from 'styled-components';
 import { Typography, CardContent, CardMedia, Button, Paper, Container } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { SectionTitle } from '../styles/SharedStyles';
 
 const ProductSection = styled.section`
-  padding: 60px 0;
+  padding: 20px 0;
   background-color: #f5f5f5;
 `;
 
-const Title = styled(Typography)`
-  text-align: center;
-  color: #e31837;
-  margin-bottom: 40px !important;
-  font-weight: bold !important;
+const ProductContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 `;
 
 const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
   
-  @media (max-width: 960px) {
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  @media (max-width: 900px) {
     grid-template-columns: repeat(2, 1fr);
   }
   
@@ -120,8 +124,8 @@ const Products = () => {
 
   return (
     <ProductSection>
-      <Container>
-        <Title variant="h4">SẢN PHẨM NỔI BẬT</Title>
+      <ProductContainer>
+        <SectionTitle>SẢN PHẨM NỔI BẬT</SectionTitle>
         <ProductGrid>
           {products.map((product) => (
             <InfoCard elevation={2} key={product.id}>
@@ -154,7 +158,7 @@ const Products = () => {
             </InfoCard>
           ))}
         </ProductGrid>
-      </Container>
+      </ProductContainer>
     </ProductSection>
   );
 };

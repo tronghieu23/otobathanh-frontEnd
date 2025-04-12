@@ -1,20 +1,30 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { Paper, Typography } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BuildIcon from '@mui/icons-material/Build';
 import PhoneIcon from '@mui/icons-material/Phone';
+import { SectionTitle } from '../styles/SharedStyles';
+
+const shake = keyframes`
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-15deg); }
+  100% { transform: rotate(0deg); }
+`;
+
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+`;
 
 const Container = styled.div`
   padding: 40px 20px;
-`;
-
-const Title = styled(Typography)`
-  text-align: center;
-  color: #ff0000;
-  margin-bottom: 40px !important;
-  font-weight: bold !important;
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 const GridContainer = styled.div`
@@ -38,13 +48,32 @@ const InfoCard = styled(Paper)`
   flex-direction: column;
   align-items: center;
   text-align: center;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
 `;
 
-const IconWrapper = styled.div`
+const IconWrapper = styled.div<{ $iconType: string }>`
   color: #ff0000;
   margin-bottom: 15px;
   .MuiSvgIcon-root {
     font-size: 40px;
+    animation: ${props => {
+      switch(props.$iconType) {
+        case 'home':
+          return pulse;
+        case 'phone':
+          return shake;
+        case 'build':
+          return pulse;
+        case 'time':
+          return shake;
+        default:
+          return 'none';
+      }
+    }} 2s infinite;
   }
 `;
 
@@ -57,10 +86,10 @@ const InfoTitle = styled(Typography)`
 const Information = () => {
   return (
     <Container>
-      <Title variant="h4">THÔNG TIN CHUNG</Title>
+      <SectionTitle>THÔNG TIN CHUNG</SectionTitle>
       <GridContainer>
         <InfoCard elevation={2}>
-          <IconWrapper>
+          <IconWrapper $iconType="home">
             <HomeIcon />
           </IconWrapper>
           <InfoTitle variant="h6">ĐỊA CHỈ</InfoTitle>
@@ -72,7 +101,7 @@ const Information = () => {
         </InfoCard>
 
         <InfoCard elevation={2}>
-          <IconWrapper>
+          <IconWrapper $iconType="time">
             <AccessTimeIcon />
           </IconWrapper>
           <InfoTitle variant="h6">GIỜ LÀM VIỆC</InfoTitle>
@@ -86,7 +115,7 @@ const Information = () => {
         </InfoCard>
 
         <InfoCard elevation={2}>
-          <IconWrapper>
+          <IconWrapper $iconType="build">
             <BuildIcon />
           </IconWrapper>
           <InfoTitle variant="h6">HIỆN SỬA CHỮA</InfoTitle>
@@ -102,7 +131,7 @@ const Information = () => {
         </InfoCard>
 
         <InfoCard elevation={2}>
-          <IconWrapper>
+          <IconWrapper $iconType="phone">
             <PhoneIcon />
           </IconWrapper>
           <InfoTitle variant="h6">CỨU HỘ 24/24</InfoTitle>

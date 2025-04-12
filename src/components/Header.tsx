@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { AppBar, Toolbar, Button, Typography, IconButton } from '@mui/material';
-import { Link } from 'react-router-dom';
-import PhoneIcon from '@mui/icons-material/Phone';
-import SearchIcon from '@mui/icons-material/Search';
+import { NavLink as RouterNavLink } from 'react-router-dom';
+import LoginForm from './LoginForm';
+import RegisterForm from './RegisterForm';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 const shake = keyframes`
   0% { transform: rotate(0deg); }
@@ -13,96 +14,208 @@ const shake = keyframes`
   100% { transform: rotate(0deg); }
 `;
 
-const StyledAppBar = styled(AppBar)`
-  background: linear-gradient(135deg, #232323 60%, #e31837 60%) !important;
-  box-shadow: none !important;
-  position: relative;
-  &:after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 40%;
-    height: 100%;
-    background: repeating-linear-gradient(
-      45deg,
-      #e31837,
-      #e31837 10px,
-      #cc1630 10px,
-      #cc1630 20px
-    );
-    clip-path: polygon(100% 0, 100% 100%, 0 100%, 25% 0);
-    z-index: 1;
+const Logo = styled.img`
+  height: 100px;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    height: 60px;
   }
 `;
 
-const StyledToolbar = styled(Toolbar)`
-  position: relative;
-  z-index: 2;
-`;
-
-const Logo = styled.img`
-  height: 50px;
-  margin-right: 40px;
-  filter: brightness(0) invert(1);
-`;
-
-const NavLink = styled(Link)`
+const NavLink = styled(RouterNavLink)`
   color: white;
   text-decoration: none;
   margin: 0 15px;
   font-weight: 500;
+  padding: 8px 0;
+  position: relative;
+
   &:hover {
     color: #ff0000;
   }
+
+  &.active {
+    color: #ff0000;
+    
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: #ff0000;
+    }
+  }
 `;
 
-const ContactButton = styled(Button)`
-  background-color: transparent !important;
-  color: white !important;
-  margin-left: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  border: 2px solid white !important;
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+const HeaderContainer = styled.header`
+  background-color: #1e2124;
+  padding: 10px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const HeaderContent = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+`;
+
+const NavLinks = styled.nav<{ $isOpen: boolean }>`
+  display: flex;
+  gap: 30px;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    display: ${props => props.$isOpen ? 'flex' : 'none'};
+    flex-direction: column;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    background: #1e2124;
+    padding: 20px;
+    gap: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    ${NavLink} {
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      margin: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
   }
+`;
+
+const AuthButtons = styled.div`
+  display: flex;
+  gap: 15px;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    gap: 10px;
+  }
+`;
+
+const AuthButton = styled.button<{ $primary?: boolean }>`
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 2px solid ${props => props.$primary ? '#e31837' : 'transparent'};
+  background-color: ${props => props.$primary ? '#e31837' : 'transparent'};
+  color: white;
+
+  &:hover {
+    background-color: ${props => props.$primary ? '#c41730' : 'rgba(255, 255, 255, 0.1)'};
+    border-color: ${props => props.$primary ? '#c41730' : 'white'};
+  }
+
+  @media (max-width: 768px) {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+`;
+
+const MenuButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+
   .MuiSvgIcon-root {
-    animation: ${shake} 1.5s ease-in-out infinite;
-  }
-`;
-
-const SearchButton = styled(IconButton)`
-  color: white !important;
-  margin-left: 16px !important;
-  border: 2px solid white !important;
-  padding: 8px !important;
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    font-size: 24px;
   }
 `;
 
 const Header = () => {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
-    <StyledAppBar position="sticky">
-      <StyledToolbar>
-        <Logo src="../image/logo192.png" alt="Ô Tô Bá Thành" />
-        <nav>
-          <NavLink to="/">TRANG CHỦ</NavLink>
-          <NavLink to="/news">TIN TỨC</NavLink>
-          <NavLink to="/services">DỊCH VỤ</NavLink>
-          <NavLink to="/products">SẢN PHẨM</NavLink>
-        </nav>
-        <ContactButton variant="outlined">
-          <PhoneIcon />
-          LIÊN HỆ NGAY
-        </ContactButton>
-        <SearchButton>
-          <SearchIcon />
-        </SearchButton>
-      </StyledToolbar>
-    </StyledAppBar>
+    <HeaderContainer>
+      <HeaderContent>
+        <Logo src="../image/logo.png" alt="Ô Tô Bá Thành" />
+        
+        <MenuButton onClick={toggleMenu}>
+          {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
+        </MenuButton>
+
+        <NavLinks $isOpen={isMenuOpen}>
+          <NavLink 
+            to="/" 
+            onClick={() => setIsMenuOpen(false)}
+            end
+          >
+            Trang chủ
+          </NavLink>
+          <NavLink 
+            to="/services" 
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Dịch vụ
+          </NavLink>
+          <NavLink 
+            to="/products" 
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Sản phẩm
+          </NavLink>
+          <NavLink 
+            to="/about" 
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Giới thiệu
+          </NavLink>
+          <NavLink 
+            to="/contact" 
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Liên hệ
+          </NavLink>
+        </NavLinks>
+
+        <AuthButtons>
+          <AuthButton onClick={() => setIsLoginOpen(true)}>Đăng nhập</AuthButton>
+          <AuthButton $primary onClick={() => setIsRegisterOpen(true)}>Đăng ký</AuthButton>
+        </AuthButtons>
+      </HeaderContent>
+
+      <LoginForm 
+        open={isLoginOpen} 
+        onClose={() => setIsLoginOpen(false)} 
+      />
+      <RegisterForm 
+        open={isRegisterOpen} 
+        onClose={() => setIsRegisterOpen(false)} 
+      />
+    </HeaderContainer>
   );
 };
 

@@ -6,31 +6,29 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const BannerContainer = styled(Box)`
   position: relative;
-  height: 500px;
+  height: 700px;
+  margin-top: 100px;
   overflow: hidden;
-`;
+  width: 100%;
+  max-width: 1920px;
+  margin-left: auto;
+  margin-right: auto;
 
-const SloganOverlay = styled.div`
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.3);
-  padding: 10px 20px;
-  border-radius: 5px;
-  z-index: 2;
-`;
+  @media (max-width: 1024px) {
+    height: 500px;
+    margin-top: 80px;
+  }
 
-const SloganText = styled.h2`
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-  text-align: center;
-  margin: 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  
   @media (max-width: 768px) {
-    font-size: 14px;
+    height: 350px;
+    margin-top: 70px;
+    padding: 0 10px;
+  }
+
+  @media (max-width: 480px) {
+    height: 200px;
+    margin-top: 60px;
+    padding: 0 5px;
   }
 `;
 
@@ -47,12 +45,26 @@ const Slide = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+
+  @media (max-width: 768px) {
+    border-radius: 6px;
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 4px;
+  }
 `;
 
 const BannerImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  display: block;
+  margin: 0;
+  padding: 0;
 `;
 
 const NavigationButton = styled(IconButton)`
@@ -61,17 +73,48 @@ const NavigationButton = styled(IconButton)`
   transform: translateY(-50%);
   background-color: rgba(255, 255, 255, 0.8) !important;
   z-index: 2;
+  
   &:hover {
     background-color: white !important;
+  }
+
+  @media (max-width: 768px) {
+    .MuiSvgIcon-root {
+      font-size: 18px;
+    }
+    padding: 6px !important;
+  }
+
+  @media (max-width: 480px) {
+    .MuiSvgIcon-root {
+      font-size: 14px;
+    }
+    padding: 4px !important;
   }
 `;
 
 const LeftButton = styled(NavigationButton)`
   left: 20px;
+  
+  @media (max-width: 768px) {
+    left: 15px;
+  }
+
+  @media (max-width: 480px) {
+    left: 8px;
+  }
 `;
 
 const RightButton = styled(NavigationButton)`
   right: 20px;
+  
+  @media (max-width: 768px) {
+    right: 15px;
+  }
+
+  @media (max-width: 480px) {
+    right: 8px;
+  }
 `;
 
 const DotContainer = styled.div`
@@ -82,6 +125,11 @@ const DotContainer = styled.div`
   display: flex;
   gap: 10px;
   z-index: 2;
+
+  @media (max-width: 768px) {
+    bottom: 10px;
+    gap: 8px;
+  }
 `;
 
 const Dot = styled.div<{ $active: boolean }>`
@@ -91,14 +139,22 @@ const Dot = styled.div<{ $active: boolean }>`
   background-color: ${props => props.$active ? '#e31837' : 'white'};
   cursor: pointer;
   transition: background-color 0.3s;
+
+  @media (max-width: 768px) {
+    width: 8px;
+    height: 8px;
+  }
 `;
 
 const Banner = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+
   const bannerImages = [
-    '../image/banner1.jpg',
-    '../image/banner2.jpg',
-    '../image/banner3.jpg'
+    '../image/banner4.jpg',
+    '../image/banner5.jpg',
+    '../image/banner4.jpg'
   ];
 
   const nextSlide = () => {
@@ -113,6 +169,24 @@ const Banner = () => {
     );
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      nextSlide(); // Swipe left
+    }
+
+    if (touchStart - touchEnd < -75) {
+      prevSlide(); // Swipe right
+    }
+  };
+
   useEffect(() => {
     const timer = setInterval(nextSlide, 5000); // Auto-slide every 5 seconds
     return () => clearInterval(timer);
@@ -120,10 +194,12 @@ const Banner = () => {
 
   return (
     <BannerContainer>
-      <SloganOverlay>
-        <SloganText>Thương hiệu là chất lượng - Uy tín là niềm tin - Nỗ lực là tôn chỉ</SloganText>
-      </SloganOverlay>
-      <SlideContainer $translateX={-currentSlide * 100}>
+      <SlideContainer 
+        $translateX={-currentSlide * 100}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {bannerImages.map((image, index) => (
           <Slide key={index}>
             <BannerImage src={image} alt={`Banner ${index + 1}`} />
