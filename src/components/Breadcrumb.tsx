@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
@@ -43,6 +43,7 @@ const CurrentPage = styled.span`
 
 const Breadcrumb = () => {
   const location = useLocation();
+  const { id } = useParams();
   const pathSegments = location.pathname.split('/').filter(segment => segment);
 
   const getPageTitle = (path: string) => {
@@ -55,31 +56,70 @@ const Breadcrumb = () => {
         return 'Giới thiệu';
       case 'contact':
         return 'Liên hệ';
+      case 'news':
+        return 'Tin tức';
       default:
-        return 'Trang chủ';
+        return path;
     }
   };
 
   if (location.pathname === '/') return null;
 
+  // Tạo breadcrumb items dựa trên pathSegments
+  const renderBreadcrumbItems = () => {
+    let items = [];
+    
+    // Luôn thêm Trang chủ
+    items.push(
+      <BreadcrumbItem key="home" to="/">
+        Trang chủ
+      </BreadcrumbItem>
+    );
+
+    // Xử lý các segments
+    pathSegments.forEach((segment, index) => {
+      // Thêm separator
+      items.push(<Separator key={`sep-${index}`} />);
+
+      // Xử lý trường hợp đặc biệt cho news detail
+      if (segment === id && pathSegments[0] === 'news') {
+        items.push(
+          <BreadcrumbItem key="news" to="/news">
+            Tin tức
+          </BreadcrumbItem>
+        );
+        items.push(<Separator key={`sep-detail`} />);
+        items.push(
+          <CurrentPage key="detail">
+            Chi tiết tin tức
+          </CurrentPage>
+        );
+        return;
+      }
+
+      // Xử lý segment cuối cùng
+      if (index === pathSegments.length - 1) {
+        items.push(
+          <CurrentPage key={segment}>
+            {getPageTitle(segment)}
+          </CurrentPage>
+        );
+      } else {
+        items.push(
+          <BreadcrumbItem key={segment} to={`/${pathSegments.slice(0, index + 1).join('/')}`}>
+            {getPageTitle(segment)}
+          </BreadcrumbItem>
+        );
+      }
+    });
+
+    return items;
+  };
+
   return (
     <BreadcrumbContainer>
       <BreadcrumbList>
-        <BreadcrumbItem to="/">
-          Trang chủ
-        </BreadcrumbItem>
-        {pathSegments.map((segment, index) => (
-          <React.Fragment key={segment}>
-            <Separator />
-            {index === pathSegments.length - 1 ? (
-              <CurrentPage>{getPageTitle(segment)}</CurrentPage>
-            ) : (
-              <BreadcrumbItem to={`/${pathSegments.slice(0, index + 1).join('/')}`}>
-                {getPageTitle(segment)}
-              </BreadcrumbItem>
-            )}
-          </React.Fragment>
-        ))}
+        {renderBreadcrumbItems()}
       </BreadcrumbList>
     </BreadcrumbContainer>
   );

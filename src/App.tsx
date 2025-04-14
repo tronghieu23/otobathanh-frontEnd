@@ -9,9 +9,11 @@ import Footer from './components/Footer';
 import ChatBox from './components/ChatBox';
 import Breadcrumb from './components/Breadcrumb';
 import About from './components/About';
-import Services from './components/Services';
+import Services from './pages/Services';
 import Contact from './components/Contact';
 import HomeStats from './components/HomeStats';
+import HomeServices from './components/HomeServices';
+import NewsPage from './pages/NewsPage';
 import styled from 'styled-components';
 
 const MainContent = styled.main`
@@ -28,6 +30,7 @@ const App = () => {
           <Route path="/" element={
             <>
               <Banner />
+              <HomeServices />
               <Products />
               <News />
               <Information />
@@ -38,6 +41,7 @@ const App = () => {
           <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/news/:id" element={<NewsPage />} />
         </Routes>
         <Footer />
       </MainContent>

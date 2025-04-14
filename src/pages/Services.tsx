@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
@@ -6,25 +6,6 @@ const ServicesContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-`;
-
-const ServiceCategories = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-  font-size: 14px;
-  color: #666;
-
-  a {
-    color: #666;
-    text-decoration: none;
-    
-    &:hover {
-      color: #e31837;
-    }
-  }
 `;
 
 const ServiceHeader = styled.div`
@@ -150,6 +131,10 @@ const Sidebar = styled.div`
 `;
 
 const Services = () => {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []); // Run once when component mounts
+
   return (
     <ServicesContainer>
       <ServiceHeader>
