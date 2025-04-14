@@ -28,7 +28,7 @@ const BannerContainer = styled(Box)`
   @media (max-width: 480px) {
     height: 200px;
     margin-top: 60px;
-    padding: 0 5px;
+    padding: 0;
   }
 `;
 
