@@ -6,50 +6,6 @@ import RegisterForm from './RegisterForm';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 
-const shake = keyframes`
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(15deg); }
-  50% { transform: rotate(0deg); }
-  75% { transform: rotate(-15deg); }
-  100% { transform: rotate(0deg); }
-`;
-
-const Logo = styled.img`
-  height: 100px;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    height: 60px;
-  }
-`;
-
-const NavLink = styled(RouterNavLink)`
-  color: white;
-  text-decoration: none;
-  margin: 0 15px;
-  font-weight: 500;
-  padding: 8px 0;
-  position: relative;
-
-  &:hover {
-    color: #ff0000;
-  }
-
-  &.active {
-    color: #ff0000;
-    
-    &:after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background-color: #ff0000;
-    }
-  }
-`;
-
 const HeaderContainer = styled.header`
   background-color: #1e2124;
   padding: 10px 0;
@@ -70,54 +26,91 @@ const HeaderContent = styled.div`
   padding: 0 20px;
 `;
 
+const Logo = styled.img`
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  
+  @media (max-width: 768px) {
+    height: 40px;
+  }
+`;
+
 const NavLinks = styled.nav<{ $isOpen: boolean }>`
   display: flex;
-  gap: 30px;
   align-items: center;
+  gap: 20px;
 
   @media (max-width: 768px) {
     display: ${props => props.$isOpen ? 'flex' : 'none'};
     flex-direction: column;
-    position: fixed;
+    position: absolute;
     top: 80px;
     left: 0;
     right: 0;
     background: #1e2124;
     padding: 20px;
-    gap: 20px;
+    gap: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+`;
 
-    ${NavLink} {
-      width: 100%;
-      text-align: center;
-      padding: 10px 0;
-      margin: 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+const NavLink = styled(RouterNavLink)`
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 12px;
+  position: relative;
+  transition: color 0.3s ease;
 
-      &:last-child {
-        border-bottom: none;
-      }
+  &:hover {
+    color: #e31837;
+  }
+
+  &.active {
+    color: #e31837;
+    
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: #e31837;
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    &:last-child {
+      border-bottom: none;
     }
   }
 `;
 
 const AuthButtons = styled.div`
   display: flex;
-  gap: 15px;
   align-items: center;
+  gap: 10px;
 
   @media (max-width: 768px) {
-    gap: 10px;
+    flex-direction: column;
+    width: 100%;
   }
 `;
 
 const AuthButton = styled.button<{ $primary?: boolean }>`
-  padding: 8px 20px;
+  padding: 8px 16px;
   border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s;
-  border: 2px solid ${props => props.$primary ? '#e31837' : 'transparent'};
+  transition: all 0.3s ease;
+  border: 1px solid ${props => props.$primary ? '#e31837' : 'transparent'};
   background-color: ${props => props.$primary ? '#e31837' : 'transparent'};
   color: white;
 
@@ -127,8 +120,8 @@ const AuthButton = styled.button<{ $primary?: boolean }>`
   }
 
   @media (max-width: 768px) {
-    padding: 6px 12px;
-    font-size: 14px;
+    width: 100%;
+    padding: 10px;
   }
 `;
 
@@ -143,27 +136,29 @@ const MenuButton = styled.button`
   @media (max-width: 768px) {
     display: block;
   }
-
-  .MuiSvgIcon-root {
-    font-size: 24px;
-  }
 `;
 
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  color: white;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+  }
 `;
 
 const UserName = styled.span`
   color: #e31837;
   font-weight: 500;
+  white-space: nowrap;
 `;
 
 const LogoutButton = styled(AuthButton)`
-  padding: 6px 12px;
-  font-size: 14px;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const Header = () => {
@@ -191,16 +186,12 @@ const Header = () => {
     window.location.reload();
   };
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   return (
     <HeaderContainer>
       <HeaderContent>
-        <Logo src="../image/logo.png" alt="Ô Tô Bá Thành" />
+        <Logo src="/image/logo.png" alt="Ô Tô Bá Thành" />
         
-        <MenuButton onClick={toggleMenu}>
+        <MenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
           {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
         </MenuButton>
 
@@ -221,28 +212,23 @@ const Header = () => {
             Liên hệ
           </NavLink>
 
-          <AuthButtons>
-            {user ? (
-              <UserInfo>
-                <UserName>Xin chào, {user.fullName}</UserName>
-                <LogoutButton onClick={handleLogout}>
-                  Đăng xuất
-                </LogoutButton>
-              </UserInfo>
-            ) : (
-              <>
-                <AuthButton onClick={() => setIsLoginOpen(true)}>
-                  Đăng nhập
-                </AuthButton>
-                <AuthButton 
-                  $primary 
-                  onClick={() => setIsRegisterOpen(true)}
-                >
-                  Đăng ký
-                </AuthButton>
-              </>
-            )}
-          </AuthButtons>
+          {user ? (
+            <UserInfo>
+              <UserName>Xin chào, {user.fullName}</UserName>
+              <LogoutButton onClick={handleLogout}>
+                Đăng xuất
+              </LogoutButton>
+            </UserInfo>
+          ) : (
+            <AuthButtons>
+              <AuthButton onClick={() => setIsLoginOpen(true)}>
+                Đăng nhập
+              </AuthButton>
+              <AuthButton $primary onClick={() => setIsRegisterOpen(true)}>
+                Đăng ký
+              </AuthButton>
+            </AuthButtons>
+          )}
         </NavLinks>
       </HeaderContent>
 
@@ -258,4 +244,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;
