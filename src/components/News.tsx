@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { SectionTitle } from '../styles/SharedStyles';
 
 const NewsSection = styled.section`
-  padding: 60px 20px;
+  padding: 40px 0;
+  background-color: white;
   max-width: 1200px;
   margin: 0 auto;
 `;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { NavLink as RouterNavLink } from 'react-router-dom';
 import LoginForm from './LoginForm';
@@ -149,10 +149,47 @@ const MenuButton = styled.button`
   }
 `;
 
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+`;
+
+const UserName = styled.span`
+  color: #e31837;
+  font-weight: 500;
+`;
+
+const LogoutButton = styled(AuthButton)`
+  padding: 6px 12px;
+  font-size: 14px;
+`;
+
 const Header = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ fullName: string } | null>(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const userData = JSON.parse(userStr);
+        setUser(userData);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    window.location.reload();
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -168,43 +205,45 @@ const Header = () => {
         </MenuButton>
 
         <NavLinks $isOpen={isMenuOpen}>
-          <NavLink 
-            to="/" 
-            onClick={() => setIsMenuOpen(false)}
-            end
-          >
+          <NavLink to="/" onClick={() => setIsMenuOpen(false)} end>
             Trang chủ
           </NavLink>
-          <NavLink 
-            to="/services" 
-            onClick={() => setIsMenuOpen(false)}
-          >
+          <NavLink to="/services" onClick={() => setIsMenuOpen(false)}>
             Dịch vụ
           </NavLink>
-          <NavLink 
-            to="/products" 
-            onClick={() => setIsMenuOpen(false)}
-          >
+          <NavLink to="/products" onClick={() => setIsMenuOpen(false)}>
             Sản phẩm
           </NavLink>
-          <NavLink 
-            to="/about" 
-            onClick={() => setIsMenuOpen(false)}
-          >
+          <NavLink to="/about" onClick={() => setIsMenuOpen(false)}>
             Giới thiệu
           </NavLink>
-          <NavLink 
-            to="/contact" 
-            onClick={() => setIsMenuOpen(false)}
-          >
+          <NavLink to="/contact" onClick={() => setIsMenuOpen(false)}>
             Liên hệ
           </NavLink>
-        </NavLinks>
 
-        <AuthButtons>
-          <AuthButton onClick={() => setIsLoginOpen(true)}>Đăng nhập</AuthButton>
-          <AuthButton $primary onClick={() => setIsRegisterOpen(true)}>Đăng ký</AuthButton>
-        </AuthButtons>
+          <AuthButtons>
+            {user ? (
+              <UserInfo>
+                <UserName>Xin chào, {user.fullName}</UserName>
+                <LogoutButton onClick={handleLogout}>
+                  Đăng xuất
+                </LogoutButton>
+              </UserInfo>
+            ) : (
+              <>
+                <AuthButton onClick={() => setIsLoginOpen(true)}>
+                  Đăng nhập
+                </AuthButton>
+                <AuthButton 
+                  $primary 
+                  onClick={() => setIsRegisterOpen(true)}
+                >
+                  Đăng ký
+                </AuthButton>
+              </>
+            )}
+          </AuthButtons>
+        </NavLinks>
       </HeaderContent>
 
       <LoginForm 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { 
+import {
   Dialog,
   DialogContent,
   IconButton,
@@ -10,6 +10,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import VerifyAccountForm from './VerifyAccountForm';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {
@@ -69,7 +74,7 @@ const VisibilityToggle = styled(IconButton)`
   color: #666 !important;
 `;
 
-const RegisterButton = styled.button`
+const RegisterButton = styled.button<{ $loading?: boolean }>`
   width: 100%;
   padding: 12px;
   background: #e31837;
@@ -78,11 +83,12 @@ const RegisterButton = styled.button`
   border-radius: 8px;
   font-size: 16px;
   font-weight: 500;
-  cursor: pointer;
+  cursor: ${props => props.$loading ? 'not-allowed' : 'pointer'};
   margin: 24px 0;
+  opacity: ${props => props.$loading ? 0.7 : 1};
 
   &:hover {
-    background: #c41730;
+    background: ${props => props.$loading ? '#e31837' : '#c41730'};
   }
 `;
 
@@ -94,10 +100,6 @@ const SocialText = styled.div`
   color: #666;
   font-size: 14px;
   margin-bottom: 16px;
-`;
-
-const SocialButtonText = styled.span`
-  font-size: 14px;
 `;
 
 const SocialButtons = styled.div`
@@ -124,11 +126,13 @@ const SocialButton = styled.button<{ $provider: 'facebook' | 'google' }>`
   &:hover {
     background: ${props => props.$provider === 'facebook' ? '#1565C0' : '#616161'};
   }
+`;
 
-  img {
-    width: 20px;
-    height: 20px;
-  }
+const ErrorMessage = styled.div`
+  color: #e31837;
+  font-size: 14px;
+  margin-top: 4px;
+  text-align: left;
 `;
 
 interface RegisterFormProps {
@@ -137,12 +141,17 @@ interface RegisterFormProps {
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [showVerifyForm, setShowVerifyForm] = useState(false);
   const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -150,90 +159,147 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
       ...prev,
       [name]: value
     }));
+    setError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Register attempt:', formData);
+    setLoading(true);
+    setError('');
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_URL}/api/accounts/create`, {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        image: null
+      });
+
+      // Close registration form
+      onClose();
+      
+      // Show verification form
+      setShowVerifyForm(true);
+      
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      if (error.response?.status === 400) {
+        setError(error.response.data);
+      } else if (error.response?.status === 500) {
+        setError(error.response.data);
+      } else {
+        setError('Không thể kết nối đến máy chủ');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`);
+    console.log(`${provider} login clicked`);
   };
 
   return (
-    <StyledDialog open={open} onClose={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <Title>Đăng ký</Title>
-          <CloseButton onClick={onClose}>
-            <CloseIcon />
-          </CloseButton>
-        </DialogHeader>
+    <>
+      <StyledDialog open={open} onClose={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <Title>Đăng Ký</Title>
+            <CloseButton onClick={onClose}>
+              <CloseIcon />
+            </CloseButton>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <InputField>
-            <Input
-              type="text"
-              name="email"
-              placeholder="Email hoặc Tên tài khoản *"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </InputField>
+          <form onSubmit={handleSubmit}>
+            <InputField>
+              <Input
+                type="text"
+                name="fullName"
+                placeholder="Họ và tên *"
+                value={formData.fullName}
+                onChange={handleChange}
+                required
+              />
+            </InputField>
 
-          <InputField>
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              name="password"
-              placeholder="Mật khẩu *"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            <VisibilityToggle onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-            </VisibilityToggle>
-          </InputField>
+            <InputField>
+              <Input
+                type="email"
+                name="email"
+                placeholder="Email *"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </InputField>
 
-          <InputField>
-            <Input
-              type="password"
-              name="confirmPassword"
-              placeholder="Xác nhận mật khẩu *"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </InputField>
+            <InputField>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="Mật khẩu *"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <VisibilityToggle onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+              </VisibilityToggle>
+            </InputField>
 
-          <RegisterButton type="submit">
-            ĐĂNG KÝ
-          </RegisterButton>
-        </form>
+            <InputField>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                placeholder="Xác nhận mật khẩu *"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </InputField>
 
-        <SocialSection>
-          <SocialText>Hoặc đăng ký với</SocialText>
-          <SocialButtons>
-          <SocialButton
-              $provider="facebook"
-              onClick={() => handleSocialLogin('facebook')}
-            >
-              <FacebookIcon />
-              <SocialButtonText>Facebook</SocialButtonText>
-            </SocialButton>
-            <SocialButton
-              $provider="google"
-              onClick={() => handleSocialLogin('google')}
-            >
-              <GoogleIcon />
-              <SocialButtonText>Google</SocialButtonText>
-            </SocialButton>
-          </SocialButtons>
-        </SocialSection>
-      </DialogContent>
-    </StyledDialog>
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+
+            <RegisterButton type="submit" $loading={loading}>
+              {loading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG KÝ'}
+            </RegisterButton>
+          </form>
+
+          <SocialSection>
+            <SocialText>Hoặc đăng ký với</SocialText>
+            <SocialButtons>
+              <SocialButton
+                $provider="facebook"
+                onClick={() => handleSocialLogin('facebook')}
+              >
+                <FacebookIcon />
+                <span>Facebook</span>
+              </SocialButton>
+              <SocialButton
+                $provider="google"
+                onClick={() => handleSocialLogin('google')}
+              >
+                <GoogleIcon />
+                <span>Google</span>
+              </SocialButton>
+            </SocialButtons>
+          </SocialSection>
+        </DialogContent>
+      </StyledDialog>
+
+      <VerifyAccountForm 
+        open={showVerifyForm}
+        onClose={() => setShowVerifyForm(false)}
+        email={formData.email}
+      />
+    </>
   );
 };
 

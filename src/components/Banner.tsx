@@ -153,8 +153,8 @@ const Banner = () => {
 
   const bannerImages = [
     '../image/banner4.jpg',
-    '../image/banner5.jpg',
-    '../image/banner4.jpg'
+    '../image/banner2.jpg',
+    '../image/banner1.jpg'
   ];
 
   const nextSlide = () => {

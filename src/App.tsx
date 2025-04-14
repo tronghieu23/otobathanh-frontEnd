@@ -11,6 +11,7 @@ import Breadcrumb from './components/Breadcrumb';
 import About from './components/About';
 import Services from './components/Services';
 import Contact from './components/Contact';
+import HomeStats from './components/HomeStats';
 import styled from 'styled-components';
 
 const MainContent = styled.main`
@@ -28,9 +29,9 @@ const App = () => {
             <>
               <Banner />
               <Products />
-              <Services />
               <News />
               <Information />
+              <HomeStats />
             </>
           } />
           <Route path="/products" element={<Products />} />

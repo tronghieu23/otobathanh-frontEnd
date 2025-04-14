@@ -14,6 +14,10 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {
@@ -165,11 +169,14 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -177,11 +184,50 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
       ...prev,
       [name]: value
     }));
+    setError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', formData);
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await axios.post(`${API_URL}/api/accounts/login`, {
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (response.data.status === "thành công") {
+        // Lưu token
+        localStorage.setItem('token', response.data.token);
+        
+        // Lưu thông tin user
+        localStorage.setItem('user', JSON.stringify({
+          id: response.data.id,
+          fullName: response.data.fullName,
+          image: response.data.image
+        }));
+
+        // Đóng form
+        onClose();
+        
+        // Chuyển về trang chủ
+        navigate('/');
+        
+        // Reload để cập nhật UI
+        window.location.reload();
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError('Có lỗi xảy ra khi đăng nhập');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -206,6 +252,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
             value={formData.email}
             onChange={handleChange}
             required
+            error={!!error}
           />
           <PasswordWrapper>
             <StyledTextField
@@ -216,16 +263,25 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
               value={formData.password}
               onChange={handleChange}
               required
+              error={!!error}
             />
             <VisibilityButton onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
             </VisibilityButton>
           </PasswordWrapper>
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+              {error}
+            </Typography>
+          )}
           <ForgotPassword onClick={() => {/* Handle forgot password */ }}>
             Quên mật khẩu?
           </ForgotPassword>
-          <LoginButton type="submit">
-            Đăng nhập
+          <LoginButton 
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? 'Đang xử lý...' : 'Đăng nhập'}
           </LoginButton>
         </form>
 

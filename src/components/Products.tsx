@@ -5,7 +5,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { SectionTitle } from '../styles/SharedStyles';
 
 const ProductSection = styled.section`
-  padding: 20px 0;
+  padding: 40px 0;
   background-color: #f5f5f5;
 `;
 
