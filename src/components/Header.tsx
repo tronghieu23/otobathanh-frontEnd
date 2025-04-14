@@ -16,6 +16,7 @@ const shake = keyframes`
 
 const Logo = styled.img`
   height: 100px;
+  width: 100px;
   margin: 0;
   
   @media (max-width: 768px) {
@@ -162,39 +163,39 @@ const Header = () => {
     <HeaderContainer>
       <HeaderContent>
         <Logo src="../image/logo.png" alt="Ô Tô Bá Thành" />
-        
+
         <MenuButton onClick={toggleMenu}>
           {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
         </MenuButton>
 
         <NavLinks $isOpen={isMenuOpen}>
-          <NavLink 
-            to="/" 
+          <NavLink
+            to="/"
             onClick={() => setIsMenuOpen(false)}
             end
           >
             Trang chủ
           </NavLink>
-          <NavLink 
-            to="/services" 
+          <NavLink
+            to="/services"
             onClick={() => setIsMenuOpen(false)}
           >
             Dịch vụ
           </NavLink>
-          <NavLink 
-            to="/products" 
+          <NavLink
+            to="/products"
             onClick={() => setIsMenuOpen(false)}
           >
             Sản phẩm
           </NavLink>
-          <NavLink 
-            to="/about" 
+          <NavLink
+            to="/about"
             onClick={() => setIsMenuOpen(false)}
           >
             Giới thiệu
           </NavLink>
-          <NavLink 
-            to="/contact" 
+          <NavLink
+            to="/contact"
             onClick={() => setIsMenuOpen(false)}
           >
             Liên hệ
@@ -207,13 +208,13 @@ const Header = () => {
         </AuthButtons>
       </HeaderContent>
 
-      <LoginForm 
-        open={isLoginOpen} 
-        onClose={() => setIsLoginOpen(false)} 
+      <LoginForm
+        open={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
       />
-      <RegisterForm 
-        open={isRegisterOpen} 
-        onClose={() => setIsRegisterOpen(false)} 
+      <RegisterForm
+        open={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
       />
     </HeaderContainer>
   );
