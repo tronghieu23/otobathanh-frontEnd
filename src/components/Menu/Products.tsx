@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { Typography, CardContent, CardMedia, Button, Paper, Container } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import InfoIcon from '@mui/icons-material/Info';
-import { SectionTitle } from '../styles/SharedStyles';
-import ProductDetail from '../pages/ProductDetail';
+import { SectionTitle } from '../../styles/SharedStyles';
+import ProductDetail from '../../pages/ProductDetail';
 
 const ProductSection = styled.section`
   padding: 40px 0;

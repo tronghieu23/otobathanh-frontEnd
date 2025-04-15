@@ -1,18 +1,18 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
+import Header from './components/Appbar/Header';
 import Banner from './components/Banner';
 import News from './components/News';
-import Products from './components/Products';
+import Products from './components/Menu/Products';
 import Information from './components/Information';
 import Footer from './components/Footer';
-import ChatBox from './components/ChatBox';
+import ChatBox from './components/Chatbox/ChatBox';
 import Breadcrumb from './components/Breadcrumb';
-import About from './components/About';
+import About from './components/Menu/About';
 import Services from './pages/Services';
-import Contact from './components/Contact';
+import Contact from './components/Menu/Contact';
 import HomeStats from './components/HomeStats';
-import HomeServices from './components/HomeServices';
+import HomeServices from './components/Menu/HomeServices';
 import NewsPage from './pages/NewsPage';
 import styled from 'styled-components';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { SectionTitle } from '../styles/SharedStyles';
+import { SectionTitle } from '../../styles/SharedStyles';
 import BuildIcon from '@mui/icons-material/Build';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
@@ -142,7 +142,7 @@ const ServiceCard = styled.div`
 
 const HomeServices = () => {
   const navigate = useNavigate();
-  
+
   const services = [
     {
       icon: <BuildIcon />,
@@ -180,8 +180,8 @@ const HomeServices = () => {
         <SectionTitle>DỊCH VỤ NỔI BẬT</SectionTitle>
         <ServicesGrid>
           {services.map((service, index) => (
-            <ServiceCard 
-              key={index} 
+            <ServiceCard
+              key={index}
               onClick={() => handleServiceClick(service.path)}
             >
               <IconWrapper>

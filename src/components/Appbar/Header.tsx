@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { NavLink as RouterNavLink } from 'react-router-dom';
-import LoginForm from './LoginForm';
-import RegisterForm from './RegisterForm';
+import LoginForm from '../AuthForm/Login/LoginForm';
+import RegisterForm from '../AuthForm/Register/RegisterForm';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -267,9 +267,9 @@ const Header = () => {
     <HeaderContainer>
       <HeaderContent>
         <LogoContainer>
-          <Logo src="/image/logo.png" alt="Ô Tô Bá Thành" />
+          <Logo src="../image/logo.png" alt="Ô Tô Bá Thành" />
         </LogoContainer>
-        
+
         <MenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
           {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
         </MenuButton>
@@ -355,13 +355,13 @@ const Header = () => {
         )}
       </HeaderContent>
 
-      <LoginForm 
-        open={isLoginOpen} 
-        onClose={() => setIsLoginOpen(false)} 
+      <LoginForm
+        open={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
       />
-      <RegisterForm 
-        open={isRegisterOpen} 
-        onClose={() => setIsRegisterOpen(false)} 
+      <RegisterForm
+        open={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
       />
     </HeaderContainer>
   );

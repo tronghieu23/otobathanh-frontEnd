@@ -184,10 +184,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
 
       // Close registration form
       onClose();
-      
+
       // Show verification form
       setShowVerifyForm(true);
-      
+
     } catch (error: any) {
       console.error('Registration error:', error);
       if (error.response?.status === 400) {
@@ -294,7 +294,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
         </DialogContent>
       </StyledDialog>
 
-      <VerifyAccountForm 
+      <VerifyAccountForm
         open={showVerifyForm}
         onClose={() => setShowVerifyForm(false)}
         email={formData.email}

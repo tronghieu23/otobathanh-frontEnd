@@ -201,7 +201,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
       if (response.data.status === "thành công") {
         // Lưu token
         localStorage.setItem('token', response.data.token);
-        
+
         // Lưu thông tin user
         localStorage.setItem('user', JSON.stringify({
           id: response.data.id,
@@ -211,10 +211,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
 
         // Đóng form
         onClose();
-        
+
         // Chuyển về trang chủ
         navigate('/');
-        
+
         // Reload để cập nhật UI
         window.location.reload();
       }
@@ -277,7 +277,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
           <ForgotPassword onClick={() => {/* Handle forgot password */ }}>
             Quên mật khẩu?
           </ForgotPassword>
-          <LoginButton 
+          <LoginButton
             type="submit"
             disabled={loading}
           >
