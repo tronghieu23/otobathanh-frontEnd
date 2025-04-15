@@ -13,6 +13,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import { useNavigate } from 'react-router-dom';
 import { registerAPI } from '../../API';
 import VerifyAccountForm from './VerifyAccountForm';
+import ForgotPasswordForm from './ForgotPasswordForm';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {
@@ -142,6 +143,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showVerifyForm, setShowVerifyForm] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -199,14 +201,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
   return (
     <>
       <StyledDialog open={open} onClose={onClose}>
+        <DialogHeader>
+          <Title>Đăng ký</Title>
+          <CloseButton onClick={onClose}>
+            <CloseIcon />
+          </CloseButton>
+        </DialogHeader>
         <DialogContent>
-          <DialogHeader>
-            <Title>Đăng Ký</Title>
-            <CloseButton onClick={onClose}>
-              <CloseIcon />
-            </CloseButton>
-          </DialogHeader>
-
           <form onSubmit={handleSubmit}>
             <InputField>
               <Input
@@ -258,10 +259,27 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
             {error && <ErrorMessage>{error}</ErrorMessage>}
 
             <RegisterButton type="submit" $loading={loading}>
-              {loading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG KÝ'}
+              {loading ? 'Đang xử lý...' : 'Đăng ký'}
             </RegisterButton>
           </form>
-
+          <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+            <button
+              onClick={() => {
+                onClose();
+                setShowForgotPassword(true);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#e31837',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Quên mật khẩu?
+            </button>
+          </div>
           <SocialSection>
             <SocialText>Hoặc đăng ký với</SocialText>
             <SocialButtons>
@@ -284,11 +302,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
         </DialogContent>
       </StyledDialog>
 
-      <VerifyAccountForm
-        open={showVerifyForm}
-        onClose={() => setShowVerifyForm(false)}
-        email={formData.email}
-      />
+      {showVerifyForm && (
+        <VerifyAccountForm
+          email={formData.email}
+          open={showVerifyForm}
+          onClose={() => setShowVerifyForm(false)}
+        />
+      )}
+
+      {showForgotPassword && (
+        <StyledDialog open={showForgotPassword} onClose={() => setShowForgotPassword(false)}>
+          <ForgotPasswordForm />
+        </StyledDialog>
+      )}
     </>
   );
 };

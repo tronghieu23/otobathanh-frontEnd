@@ -13,9 +13,8 @@ import Services from './pages/Services';
 import Contact from './components/Menu/Contact';
 import HomeStats from './components/HomeStats';
 import HomeServices from './components/Menu/HomeServices';
-import NewsPage from './pages/NewsPage';
+import NewsDetail from './pages/NewsDetail';
 import styled from 'styled-components';
-
 const MainContent = styled.main`
   margin-top: 80px;
 `;
@@ -41,7 +40,7 @@ const App = () => {
           <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/news/:id" element={<NewsPage />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
         </Routes>
         <Footer />
       </MainContent>
