@@ -10,11 +10,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { registerAPI } from '../../API';
 import VerifyAccountForm from './VerifyAccountForm';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {
@@ -56,11 +54,11 @@ const Input = styled.input`
   font-size: 16px;
   outline: none;
   box-sizing: border-box;
-
+  
   &:focus {
     border-color: #e31837;
   }
-
+  
   &::placeholder {
     color: #666;
   }
@@ -86,7 +84,7 @@ const RegisterButton = styled.button<{ $loading?: boolean }>`
   cursor: ${props => props.$loading ? 'not-allowed' : 'pointer'};
   margin: 24px 0;
   opacity: ${props => props.$loading ? 0.7 : 1};
-
+  
   &:hover {
     background: ${props => props.$loading ? '#e31837' : '#c41730'};
   }
@@ -148,7 +146,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
     fullName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    image: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -175,28 +174,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/api/accounts/create`, {
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        image: null
-      });
-
+      const response = await registerAPI(
+        formData.fullName,
+        formData.email,
+        formData.password,
+        formData.image
+      );
       // Close registration form
       onClose();
 
       // Show verification form
       setShowVerifyForm(true);
-
-    } catch (error: any) {
-      console.error('Registration error:', error);
-      if (error.response?.status === 400) {
-        setError(error.response.data);
-      } else if (error.response?.status === 500) {
-        setError(error.response.data);
-      } else {
-        setError('Không thể kết nối đến máy chủ');
-      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng ký');
     } finally {
       setLoading(false);
     }

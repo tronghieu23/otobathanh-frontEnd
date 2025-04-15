@@ -1,13 +1,30 @@
 import axios from 'axios';
 
-const URL_API = "https://localhost:3000/api/";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
-// export const signUpAPI = async (accountData) => {
-//     const res = await axios.post(`${URL_API}/api/accounts/create`, accountData);
-//     return res.data;
-// }
+export const loginAPI = async (email, password) => {
+    const response = await axios.post(`${API_URL}/api/accounts/login`, {
+        email,
+        password
+    });
+    return response.data;
+}
 
-// export const loginAPI = async (accountData) => {
-//     const res = await axios.post(`${URL_API}/api/accounts/login)
-//     return res.data
-//   }
+export const registerAPI = async (fullName, email, password, image) => {
+    const response = await axios.post(`${API_URL}/api/accounts/create`, {
+        fullName,
+        email,
+        password,
+        image
+      });
+    return response.data;
+}
+
+export const verifyAccountAPI = async (email, verificationCode) => {
+    const response = await axios.post(`${API_URL}/api/accounts/verify`, {
+        email,
+        code: verificationCode
+      });
+    return response.data;
+}
+

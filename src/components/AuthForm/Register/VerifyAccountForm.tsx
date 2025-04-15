@@ -6,10 +6,8 @@ import {
   IconButton,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+import { verifyAccountAPI } from '../../API';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {
@@ -111,13 +109,10 @@ const VerifyAccountForm: React.FC<VerifyAccountFormProps> = ({ open, onClose, em
     setError('');
 
     try {
-      const response = await axios.post(`${API_URL}/api/accounts/verify`, {
-        email,
-        code: verificationCode
-      });
+      const response = await verifyAccountAPI(email, verificationCode);
 
-      if (response.data.status === "thành công") {
-        alert(response.data.message);
+      if (response.status === "thành công") {
+        alert(response.message);
         onClose();
         navigate('/');
       }

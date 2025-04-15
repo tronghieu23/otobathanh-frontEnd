@@ -14,10 +14,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+import { loginAPI } from '../../API';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {
@@ -193,38 +191,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
     setError('');
 
     try {
-      const response = await axios.post(`${API_URL}/api/accounts/login`, {
-        email: formData.email,
-        password: formData.password
-      });
-
-      if (response.data.status === "thành công") {
+      const response = await loginAPI(formData.email, formData.password);
+      
+      if (response.status === "thành công") {
         // Lưu token
-        localStorage.setItem('token', response.data.token);
-
+        localStorage.setItem('token', response.token);
+        
         // Lưu thông tin user
         localStorage.setItem('user', JSON.stringify({
-          id: response.data.id,
-          fullName: response.data.fullName,
-          image: response.data.image
+          id: response.id,
+          fullName: response.fullName,
+          image: response.image
         }));
 
-        // Đóng form
         onClose();
-
-        // Chuyển về trang chủ
         navigate('/');
-
-        // Reload để cập nhật UI
         window.location.reload();
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
       } else {
-        setError('Có lỗi xảy ra khi đăng nhập');
+        throw new Error(response.message || 'Đăng nhập thất bại');
       }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng nhập');
     } finally {
       setLoading(false);
     }
