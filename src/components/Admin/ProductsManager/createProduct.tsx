@@ -10,6 +10,9 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { createProductAPI, updateProductAPI } from '../../API';
+import { getCommentsByProductIdAPI, deleteCommentAPI } from '../../API';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { IconButton } from '@mui/material';
 
 const PageContainer = styled(Container)`
   padding: 40px 0;
@@ -81,6 +84,16 @@ interface Props {
   editingProduct: Product | null;
 }
 
+// Add to interfaces
+interface Comment {
+  _id: string;
+  comment: string;
+  account: {
+    fullName: string;
+  };
+  createdAt: string;
+}
+
 const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<EditFormData>({
@@ -99,7 +112,9 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
     severity: 'success'
   });
   const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
 
+  // Add new useEffect to fetch comments when editing
   useEffect(() => {
     if (editingProduct) {
       setFormData({
@@ -111,7 +126,39 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
       });
       setCurrentImage(editingProduct.image);
     }
+
+    const fetchComments = async () => {
+      if (editingProduct?._id) {
+        try {
+          const commentsData = await getCommentsByProductIdAPI(editingProduct._id);
+          setComments(commentsData);
+        } catch (error) {
+          console.error('Error fetching comments:', error);
+        }
+      }
+    };
+    fetchComments();
   }, [editingProduct]);
+
+  // Add function to handle comment deletion
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await deleteCommentAPI(commentId);
+      setComments(comments.filter(comment => comment._id !== commentId));
+      setSnackbar({
+        open: true,
+        message: 'Xóa bình luận thành công!',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa bình luận',
+        severity: 'error'
+      });
+    }
+  };
 
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -170,6 +217,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
       });
       setImage(null);
       setCurrentImage(null);
+      onSuccess();
     } catch (error) {
       console.error('Error:', error);
       setSnackbar({
@@ -211,6 +259,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
           severity: 'success'
         });
       }
+      onSuccess();
     } catch (error) {
       console.error('Error:', error);
       setSnackbar({
@@ -383,8 +432,56 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
           </Box>
         </form>
       </FormContainer>
+      
+      {/* Add comments section after the form */}
+      {editingProduct && (
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h6" sx={{ mb: 2, color: '#e31837' }}>
+            Bình luận của sản phẩm
+          </Typography>
+          {comments.length > 0 ? (
+            <FormContainer>
+              {comments.map((comment) => (
+                <Box
+                  key={comment._id}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    p: 2,
+                    mb: 2,
+                    bgcolor: '#f5f5f5',
+                    borderRadius: 1
+                  }}
+                >
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ color: '#666' }}>
+                      {comment.account.fullName}
+                    </Typography>
+                    <Typography>{comment.comment}</Typography>
+                    <Typography variant="caption" sx={{ color: '#666' }}>
+                      {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    onClick={() => handleDeleteComment(comment._id)}
+                    color="error"
+                    size="small"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              ))}
+            </FormContainer>
+          ) : (
+            <Typography sx={{ color: '#666' }}>
+              Chưa có bình luận nào cho sản phẩm này.
+            </Typography>
+          )}
+        </Box>
+      )}
     </PageContainer>
   );
 };
 
-export default CreateProduct; 
+export default CreateProduct;

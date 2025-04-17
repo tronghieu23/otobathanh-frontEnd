@@ -52,7 +52,7 @@ function a11yProps(index: number) {
 }
 
 export default function AccountManager() {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(1);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import IndexProduct from './components/Admin/ProductsManager/indexProduct';
 import IndexAccount from './components/Admin/AccountsManager/indexAccount';
 import ProductPage from './pages/ProductDetail';
+import IndexNews from './components/Admin/NewsManager/indexNews';
 
 const MainContent = styled.main`
   margin-top: 80px;
@@ -47,6 +48,7 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/indexProduct" element={<IndexProduct />} />
           <Route path="/indexAccount" element={<IndexAccount />} />
+          <Route path="/indexNews" element={<IndexNews />} />
           <Route path="/news/:id" element={<NewsDetail />} />
         </Routes>
         <Footer />

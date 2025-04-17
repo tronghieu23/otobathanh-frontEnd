@@ -54,7 +54,7 @@ function a11yProps(index: number) {
 }
 
 export default function ProductManager() {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(1);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

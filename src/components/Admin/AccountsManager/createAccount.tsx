@@ -87,7 +87,6 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [availableRoles, setAvailableRoles] = useState<{ _id: string; name: string; }[]>([]);
     const [snackbar, setSnackbar] = useState({
         open: false,

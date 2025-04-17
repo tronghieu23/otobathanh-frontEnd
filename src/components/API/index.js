@@ -236,4 +236,18 @@ export const getCommentsByProductIdAPI = async (productId) => {
   }
 };
 
+export const deleteCommentAPI = async (commentId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/comments/${commentId}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    throw error;
+  }
+};
+
 

@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { getAllAccountsAPI, deleteAccountAPI, updateAccountAPI } from '../../API';
+import { getAllAccountsAPI, deleteAccountAPI} from '../../API';
 import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
