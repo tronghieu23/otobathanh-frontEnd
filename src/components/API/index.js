@@ -72,6 +72,15 @@ export const updateProductAPI = async (productId, formData) => {
     }
 };
 
+export const getProductByIdAPI = async (productId) => {
+    try {
+        const response = await axios.get(`${API_URL}/api/products/${productId}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 // Account APIs
 export const getAllAccountsAPI = async () => {
     try {
@@ -150,6 +159,81 @@ export const deleteAccountAPI = async (accountId) => {
         console.error('Error deleting account:', error);
         throw error;
     }
+};
+
+// News APIs
+export const getAllNewsAPI = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/api/news`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getNewsByIdAPI = async (newsId) => {
+    try {
+        const response = await axios.get(`${API_URL}/api/news/${newsId}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const createNewsAPI = async (newsData) => {
+    try {
+        const response = await axios.post(`${API_URL}/api/news/create`, newsData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const updateNewsAPI = async (newsId, newsData) => {
+    try {
+        const response = await axios.put(`${API_URL}/api/news/${newsId}`, newsData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteNewsAPI = async (newsId) => {
+    try {
+        const response = await axios.delete(`${API_URL}/api/news/${newsId}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Update the comment API functions
+export const createCommentAPI = async (commentData) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/comments/create`, {
+      comment: commentData.comment,
+      accountId: commentData.accountId,
+      productId: commentData.productId
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating comment:', error);
+    throw error;
+  }
+};
+
+export const getCommentsByProductIdAPI = async (productId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/comments/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    throw error;
+  }
 };
 
 

@@ -12,7 +12,6 @@ import {
     Alert
 } from '@mui/material';
 import { createAccountAPI, getAllAccountsAPI, updateAccountAPI } from '../../API';
-import axios from 'axios';
 
 const Container = styled.div`
   padding: 20px;

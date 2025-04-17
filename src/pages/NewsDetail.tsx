@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { getNewsByIdAPI, getAllNewsAPI } from '../components/API';
 
 const NewsContainer = styled.div`
   max-width: 1200px;
@@ -80,49 +81,45 @@ const Sidebar = styled.div`
   }
 `;
 
+interface NewsItem {
+  _id: string;
+  title: string;
+  content: string;
+  image: string;
+  createdAt: string;
+}
+
 const NewsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [currentNews, setCurrentNews] = useState<NewsItem | null>(null);
+  const [relatedNews, setRelatedNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
+    const fetchNewsDetails = async () => {
+      try {
+        if (id) {
+          // Fetch current news
+          const newsData = await getNewsByIdAPI(id);
+          setCurrentNews(newsData);
+
+          // Fetch all news for related news
+          const allNews = await getAllNewsAPI();
+          const filtered = allNews.filter((news: NewsItem) => news._id !== id).slice(0, 3);
+          setRelatedNews(filtered);
+        }
+      } catch (error) {
+        console.error('Error fetching news:', error);
+        navigate('/news');
+      }
+    };
+
+    fetchNewsDetails();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [id]);
-
-  // Mảng tin tức mẫu (trong thực tế sẽ lấy từ API)
-  const newsData = [
-    {
-      id: '1',
-      title: 'Chương trình khuyến mãi đặc biệt tháng 6',
-      content: 'Nội dung chi tiết về chương trình khuyến mãi...',
-      date: '20/03/2024',
-      image: '../image/news1.jpg'
-    },
-    {
-      id: '2',
-      title: 'Ra mắt dịch vụ chăm sóc xe cao cấp',
-      content: 'Thông tin về dịch vụ chăm sóc xe mới...',
-      date: '18/03/2024',
-      image: '../image/news2.jpg'
-    },
-    {
-      id: '3',
-      title: 'Mở rộng hệ thống đại lý trên toàn quốc',
-      content: 'Chi tiết về kế hoạch mở rộng...',
-      date: '15/03/2024',
-      image: '../image/news3.jpg'
-    }
-  ];
-
-  const currentNews = newsData.find(news => news.id === id);
-  const relatedNews = newsData.filter(news => news.id !== id).slice(0, 3);
-
-  const handleBack = () => {
-    navigate(-1);
-  };
+  }, [id, navigate]);
 
   if (!currentNews && id) {
-    navigate('/news');
-    return null;
+    return <div>Loading...</div>;
   }
 
   return (
@@ -132,7 +129,7 @@ const NewsPage = () => {
           <NewsHeader>
             <NewsTitle>{currentNews.title}</NewsTitle>
             <NewsMeta>
-              ĐĂNG VÀO <span>{currentNews.date}</span> BỞI <span>ADMIN</span>
+              ĐĂNG VÀO <span>{new Date(currentNews.createdAt).toLocaleDateString('vi-VN')}</span> BỞI <span>ADMIN</span>
             </NewsMeta>
           </NewsHeader>
 
@@ -146,7 +143,7 @@ const NewsPage = () => {
               <h3>Tin tức liên quan</h3>
               <ul>
                 {relatedNews.map(news => (
-                  <li key={news.id} onClick={() => navigate(`/news/${news.id}`)}>
+                  <li key={news._id} onClick={() => navigate(`/news/${news._id}`)}>
                     {news.title}
                   </li>
                 ))}
@@ -154,23 +151,9 @@ const NewsPage = () => {
             </Sidebar>
           </NewsContent>
         </>
-      ) : (
-        <div>
-          {/* Hiển thị danh sách tin tức ở đây */}
-          <h1>Tin tức</h1>
-          <div>
-            {newsData.map(news => (
-              <div key={news.id} onClick={() => navigate(`/news/${news.id}`)}>
-                <img src={news.image} alt={news.title} />
-                <h3>{news.title}</h3>
-                <p>{news.content}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      ) : null}
     </NewsContainer>
   );
 };
 
-export default NewsPage; 
+export default NewsPage;
