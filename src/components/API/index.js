@@ -28,8 +28,8 @@ export const verifyAccountAPI = async (email, verificationCode) => {
     return response.data;
 }
 
-export const createProductAPI = async (payload) => {
-    const response = await axios.post(`${API_URL}/api/products/create`, payload);
+export const createProductAPI = async (formData) => {
+    const response = await axios.post(`${API_URL}/api/products/create`, formData);
     return response.data;
 };
 
@@ -47,6 +47,109 @@ export const resetPasswordAPI = async (email, verificationCode, newPassword) => 
         newPassword
     });
     return response.data;
+};
+
+export const getAllProductsAPI = async () => {
+    const response = await axios.get(`${API_URL}/api/products`);
+    return response.data;
+};
+
+export const deleteProductAPI = async (productId) => {
+    try {
+        const response = await axios.delete(`${API_URL}/api/products/${productId}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const updateProductAPI = async (productId, formData) => {
+    try {
+        const response = await axios.put(`${API_URL}/api/products/${productId}`, formData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Account APIs
+export const getAllAccountsAPI = async () => {
+    try {
+        const response = await fetch('http://localhost:3000/api/accounts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch accounts');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching accounts:', error);
+        throw error;
+    }
+};
+
+export const createAccountAPI = async (accountData) => {
+    try {
+        const response = await fetch('http://localhost:3000/api/accounts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(accountData)
+        });
+        if (!response.ok) {
+            throw new Error('Failed to create account');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating account:', error);
+        throw error;
+    }
+};
+
+export const updateAccountAPI = async (accountId, accountData) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/accounts/${accountId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(accountData)
+            
+        });
+        if (!response.ok) {
+            throw new Error('Failed to update account');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating account:', error);
+        throw error;
+    }
+};
+
+export const deleteAccountAPI = async (accountId) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/accounts/${accountId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to delete account');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        throw error;
+    }
 };
 
 

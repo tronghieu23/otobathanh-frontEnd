@@ -15,6 +15,8 @@ import HomeStats from './components/HomeStats';
 import HomeServices from './components/Menu/HomeServices';
 import NewsDetail from './pages/NewsDetail';
 import styled from 'styled-components';
+import IndexProduct from './components/Admin/ProductsManager/indexProduct';
+import IndexAccount from './components/Admin/AccountsManager/indexAccount';
 const MainContent = styled.main`
   margin-top: 80px;
 `;
@@ -40,6 +42,8 @@ const App = () => {
           <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/indexProduct" element={<IndexProduct />} />
+          <Route path="/indexAccount" element={<IndexAccount />} />
           <Route path="/news/:id" element={<NewsDetail />} />
         </Routes>
         <Footer />

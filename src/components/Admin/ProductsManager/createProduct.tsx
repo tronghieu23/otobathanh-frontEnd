@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   Container,
@@ -9,7 +9,7 @@ import {
   Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { createProductAPI } from '../../API';
+import { createProductAPI, updateProductAPI } from '../../API';
 
 const PageContainer = styled(Container)`
   padding: 40px 0;
@@ -48,30 +48,70 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
-const SubmitButton = styled(Button)`
-  background-color: #e31837 !important;
-  color: white !important;
-  padding: 12px 24px !important;
-  border-radius: 8px !important;
-  font-weight: bold !important;
-  width: 100%;
-  margin-top: 20px !important;
-  
-  &:hover {
-    background-color: #c41730 !important;
-  }
-`;
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  category_id: {
+    _id: string;
+    name: string;
+  };
+  description: string;
+  image: string;
+  subImages: string[];
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-const AddProduct = () => {
+interface EditFormData {
+  name: string;
+  price: string;
+  quantity: string;
+  category_id: {
+    _id: string;
+    name: string;
+  };
+  description: string;
+}
+
+interface Props {
+  onSuccess: () => void;
+  editingProduct: Product | null;
+}
+
+const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [category_id, setCategoryId] = useState('');
-  const [description, setDescription] = useState('');
+  const [formData, setFormData] = useState<EditFormData>({
+    name: '',
+    price: '',
+    quantity: '',
+    category_id: { _id: '', name: '' },
+    description: ''
+  });
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingProduct) {
+      setFormData({
+        name: editingProduct.name,
+        price: editingProduct.price.toString(),
+        quantity: editingProduct.quantity.toString(),
+        category_id: editingProduct.category_id,
+        description: editingProduct.description || ''
+      });
+      setCurrentImage(editingProduct.image);
+    }
+  }, [editingProduct]);
 
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -82,51 +122,102 @@ const AddProduct = () => {
     });
   };
 
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!name || !price || !quantity || !category_id) {
-      setError('Vui lòng điền đầy đủ thông tin bắt buộc');
+    if (!formData.name || !formData.price || !formData.quantity || !formData.category_id._id) {
+      setError('Vui lòng điền đầy đủ thông tin');
       return;
     }
 
     try {
-      setError('');
-      let base64Image: string | null = null;
-
+      let base64Image = null;
       if (image) {
-        base64Image = await convertToBase64(image); // Convert file -> base64
+        base64Image = await convertToBase64(image);
       }
 
-      const payload = {
-        name: name.trim(),
-        price: Number(price),
-        quantity: Number(quantity),
-        category_id: category_id.trim(),
-        description: description?.trim() || '',
-        image: base64Image,          // Gửi ảnh dưới dạng base64 string
-        subImages: []                // Nếu sau này cần ảnh phụ
+      const newProduct = {
+        name: formData.name,
+        description: formData.description,
+        price: Number(formData.price),
+        quantity: Number(formData.quantity),
+        category_id: formData.category_id,
+        image: base64Image
       };
 
-      console.log("🚀 Payload gửi đi:", payload);
-
-      await createProductAPI(payload);
-      setSuccess('Thêm sản phẩm thành công!');
+      await createProductAPI(newProduct);
+      setSnackbar({
+        open: true,
+        message: 'Thêm sản phẩm thành công!',
+        severity: 'success'
+      });
 
       // Reset form
-      setName('');
-      setDescription('');
-      setPrice('');
-      setQuantity('');
-      setCategoryId('');
+      setFormData({
+        name: '',
+        price: '',
+        quantity: '',
+        category_id: { _id: '', name: '' },
+        description: ''
+      });
       setImage(null);
-
-      setTimeout(() => {
-        navigate('/admin/products');
-      }, 2000);
+      setCurrentImage(null);
     } catch (error) {
-      console.error('Error creating product:', error);
-      setError('Có lỗi xảy ra khi thêm sản phẩm');
+      console.error('Error:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi thêm sản phẩm',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.price || !formData.quantity || !formData.category_id._id) {
+      setError('Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+
+    try {
+      let base64Image = null;
+      if (image) {
+        base64Image = await convertToBase64(image);
+      }
+
+      const updatedProduct = {
+        name: formData.name,
+        description: formData.description,
+        price: Number(formData.price),
+        quantity: Number(formData.quantity),
+        category_id: formData.category_id,
+        image: base64Image || currentImage
+      };
+
+      if (editingProduct) {
+        await updateProductAPI(editingProduct._id, updatedProduct);
+        setSnackbar({
+          open: true,
+          message: 'Cập nhật sản phẩm thành công!',
+          severity: 'success'
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi cập nhật sản phẩm',
+        severity: 'error'
+      });
     }
   };
 
@@ -138,20 +229,21 @@ const AddProduct = () => {
 
   return (
     <PageContainer maxWidth="lg">
-      <Title variant="h4">Thêm Sản Phẩm Mới</Title>
+      <Title variant="h4">{editingProduct ? "Chỉnh sửa sản phẩm" : "Thêm Sản Phẩm Mới"}</Title>
 
       <FormContainer>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={editingProduct ? handleUpdate : handleSubmit}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
             <Box>
               <StyledTextField
                 fullWidth
                 label="Tên sản phẩm"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={handleFormChange}
+                name="name"
                 required
-                error={!name && error !== ''}
-                helperText={!name && error !== '' ? 'Tên sản phẩm là bắt buộc' : ''}
+                error={!formData.name && error !== ''}
+                helperText={!formData.name && error !== '' ? 'Tên sản phẩm là bắt buộc' : ''}
               />
             </Box>
 
@@ -159,11 +251,12 @@ const AddProduct = () => {
               <StyledTextField
                 fullWidth
                 label="Danh mục"
-                value={category_id}
-                onChange={(e) => setCategoryId(e.target.value)}
+                value={formData.category_id.name}
+                onChange={handleFormChange}
+                name="category_id.name"
                 required
-                error={!category_id && error !== ''}
-                helperText={!category_id && error !== '' ? 'Danh mục là bắt buộc' : ''}
+                error={!formData.category_id.name && error !== ''}
+                helperText={!formData.category_id.name && error !== '' ? 'Danh mục là bắt buộc' : ''}
               />
             </Box>
 
@@ -172,11 +265,12 @@ const AddProduct = () => {
                 fullWidth
                 label="Giá"
                 type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                value={formData.price}
+                onChange={handleFormChange}
+                name="price"
                 required
-                error={!price && error !== ''}
-                helperText={!price && error !== '' ? 'Giá là bắt buộc' : ''}
+                error={!formData.price && error !== ''}
+                helperText={!formData.price && error !== '' ? 'Giá là bắt buộc' : ''}
               />
             </Box>
 
@@ -185,11 +279,12 @@ const AddProduct = () => {
                 fullWidth
                 label="Số lượng"
                 type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                value={formData.quantity}
+                onChange={handleFormChange}
+                name="quantity"
                 required
-                error={!quantity && error !== ''}
-                helperText={!quantity && error !== '' ? 'Số lượng là bắt buộc' : ''}
+                error={!formData.quantity && error !== ''}
+                helperText={!formData.quantity && error !== '' ? 'Số lượng là bắt buộc' : ''}
               />
             </Box>
 
@@ -197,24 +292,40 @@ const AddProduct = () => {
               <StyledTextField
                 fullWidth
                 label="Mô tả"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={handleFormChange}
+                name="description"
                 multiline
                 rows={4}
                 required
-                error={!description && error !== ''}
-                helperText={!description && error !== '' ? 'Mô tả là bắt buộc' : ''}
+                error={!formData.description && error !== ''}
+                helperText={!formData.description && error !== '' ? 'Mô tả là bắt buộc' : ''}
               />
             </Box>
 
-            <Box sx={{ gridColumn: '1 / -1' }}>
+            <Box sx={{ gridColumn: '1 / -1', mb: 3 }}>
+              {currentImage && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Ảnh hiện tại:</Typography>
+                  <img
+                    src={currentImage}
+                    alt="Current product"
+                    style={{
+                      maxWidth: '200px',
+                      maxHeight: '200px',
+                      objectFit: 'cover',
+                      borderRadius: '8px'
+                    }}
+                  />
+                </Box>
+              )}
+
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
                 style={{ display: 'none' }}
                 id="image-upload"
-                required
               />
               <label htmlFor="image-upload">
                 <Button
@@ -222,7 +333,7 @@ const AddProduct = () => {
                   component="span"
                   fullWidth
                 >
-                  Chọn ảnh sản phẩm
+                  {editingProduct ? "Thay đổi ảnh" : "Chọn ảnh sản phẩm"}
                 </Button>
               </label>
               {image && (
@@ -245,15 +356,35 @@ const AddProduct = () => {
             </Alert>
           )}
 
-          <SubmitButton
-            type="submit"
-          >
-            Thêm sản phẩm
-          </SubmitButton>
+          <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setFormData({
+                  name: '',
+                  price: '',
+                  quantity: '',
+                  category_id: { _id: '', name: '' },
+                  description: ''
+                });
+                setImage(null);
+                setCurrentImage(null);
+              }}
+            >
+              Làm mới
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+            >
+              {editingProduct ? "Cập nhật" : "Thêm mới"}
+            </Button>
+          </Box>
         </form>
       </FormContainer>
     </PageContainer>
   );
 };
 
-export default AddProduct; 
+export default CreateProduct; 
