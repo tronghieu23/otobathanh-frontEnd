@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getProductByIdAPI, getAllProductsAPI, createCommentAPI, getCommentsByProductIdAPI } from '../components/API';
+import { getProductByIdAPI, getAllProductsAPI, createCommentAPI, getCommentsByProductIdAPI } from '../API';
+import { getCurrentUser } from '../Utils/auth';
 
 // Styled Components for layout and design
 const ProductContainer = styled.div`
@@ -215,8 +216,6 @@ interface User {
 }
 
 const ProductPage = () => {
-  // Update user state with proper type
-  const [user, setUser] = useState<User | null>(null);
   
   const { id } = useParams();
   const navigate = useNavigate();
@@ -225,29 +224,13 @@ const ProductPage = () => {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
-
-  useEffect(() => {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      try {
-        const userData = JSON.parse(userStr);
-        // Make sure we have the user ID
-        if (userData && userData.id) {
-          setUser(userData);
-        }
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-      }
-    }
-  }, []);
+  const user = getCurrentUser();
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log('User ID:', user?.id);
       if (!user?.id) {
         alert('Vui lòng đăng nhập để bình luận!');
-        navigate('/');
         return;
       }
 
@@ -301,7 +284,7 @@ const ProductPage = () => {
           const allProducts = await getAllProductsAPI();
           const filtered = allProducts
             .filter((p: Product) => p._id !== id) // Exclude current product
-            .slice(0, 3); // Get only 3 related products
+            .slice(0, 8); // Get only 3 related products
           setRelatedProducts(filtered);
         }
       } catch (error) {

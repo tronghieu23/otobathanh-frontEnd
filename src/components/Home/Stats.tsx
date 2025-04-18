@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { SectionTitle } from '../styles/SharedStyles';
+import { SectionTitle } from '../../Styles/SharedStyles';
 
 const Container = styled.div`
   background-color: white;

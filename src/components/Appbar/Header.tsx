@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { NavLink as RouterNavLink } from 'react-router-dom';
-import LoginForm from '../AuthForm/Login/LoginForm';
-import RegisterForm from '../AuthForm/Register/RegisterForm';
+import LoginForm from '../AuthForm/Login/Login';
+import RegisterForm from '../AuthForm/Register/Register';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import { getCurrentUser, handleLogout } from '../Utils/auth';
+import { getAccountByIdAPI } from '../API';
 
 const HeaderContainer = styled.header`
   background-color: #1e2124;
@@ -37,6 +39,16 @@ const HeaderContent = styled.div`
 const LogoContainer = styled.div`
   flex: 0 0 auto;
   z-index: 1001;
+`;
+
+// Add this styled component after other styled components
+const UserAvatar = styled.img`
+width: 32px;
+height: 32px;
+border-radius: 50%;
+object-fit: cover;
+margin-right: 8px;
+border: 2px solid #e31837;
 `;
 
 const Logo = styled.img`
@@ -238,31 +250,100 @@ const MobileNav = styled.div`
   }
 `;
 
+// Update UserDropdown component to handle hover
+// First, define DropdownContent before UserDropdown
+const DropdownContent = styled.div<{ $isOpen: boolean }>`
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #1e2124;
+  min-width: 200px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1002;
+
+  @media (max-width: 768px) {
+    position: static;
+    width: 100%;
+    margin-top: 10px;
+    display: ${props => props.$isOpen ? 'block' : 'none'};
+  }
+`;
+
+// Then define UserDropdown that references DropdownContent
+const UserDropdown = styled.div`
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+
+  &:hover ${DropdownContent} {
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const DropdownItem = styled(NavLink)`
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e31837;
+  }
+`;
+
+const DropdownButton = styled.button`
+  background: none;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e31837;
+  }
+`;
+
 const Header = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ fullName: string } | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [userImage, setUserImage] = useState('');  // Add this state
+  const user = getCurrentUser();
 
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
+    const fetchUserData = async () => {
       try {
-        const userData = JSON.parse(userStr);
-        setUser(userData);
+        if (user?.id) {
+          const response = await getAccountByIdAPI(user.id);
+          if (response && response.account && response.account.image) {
+            setUserImage(response.account.image);
+          }
+        }
       } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error('Error fetching user data:', error);
       }
-    }
-  }, []);
+    };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    window.location.reload();
-  };
+    fetchUserData();
+  }, [user]);
 
+  // In the render section, update the UserAvatar src
   return (
     <HeaderContainer>
       <HeaderContent>
@@ -293,14 +374,43 @@ const Header = () => {
             </NavLink>
           </NavLinks>
         </NavContainer>
-
+        
         <AuthContainer>
           {user ? (
             <UserInfo>
-              <UserName>Xin chào, {user.fullName}</UserName>
-              <LogoutButton onClick={handleLogout}>
-                Đăng xuất
-              </LogoutButton>
+              <UserDropdown>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {(userImage || user.image) && (
+                    <UserAvatar 
+                      src={userImage || user.image} 
+                      alt={user.fullName} 
+                    />
+                  )}
+                  <UserName>
+                    {user.fullName}
+                  </UserName>
+                </div>
+                <DropdownContent $isOpen={isDropdownOpen}>
+                  <DropdownItem to="/account/profile">
+                    Thông tin tài khoản
+                  </DropdownItem>
+                  <DropdownItem to="/account/update">
+                    Cập nhật tài khoản
+                  </DropdownItem>
+                  <DropdownItem to="/account/changePass">
+                    Thay đổi mật khẩu
+                  </DropdownItem>
+                  <DropdownItem to="/account/historyOrder">
+                    Lịch sử mua hàng
+                  </DropdownItem>
+                  <DropdownItem to="/account/likeProducts">
+                    Sản phẩm yêu thích
+                  </DropdownItem>
+                  <DropdownButton onClick={handleLogout}>
+                    Đăng xuất
+                  </DropdownButton>
+                </DropdownContent>
+              </UserDropdown>
             </UserInfo>
           ) : (
             <AuthButtons>
@@ -336,8 +446,17 @@ const Header = () => {
             </NavLinks>
             {user ? (
               <UserInfo>
-                <UserName>Xin chào, {user.fullName}</UserName>
-                <LogoutButton onClick={handleLogout}>
+                <UserName>{user.fullName}</UserName>
+                <NavLink to="/account/profile" onClick={() => setIsMenuOpen(false)}>
+                  Thông tin tài khoản
+                </NavLink>
+                <NavLink to="/account/update" onClick={() => setIsMenuOpen(false)}>
+                  Cập nhật tài khoản
+                </NavLink>
+                <LogoutButton onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}>
                   Đăng xuất
                 </LogoutButton>
               </UserInfo>

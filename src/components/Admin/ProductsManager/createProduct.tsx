@@ -206,15 +206,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
         message: 'Thêm sản phẩm thành công!',
         severity: 'success'
       });
-
-      // Reset form
-      setFormData({
-        name: '',
-        price: '',
-        quantity: '',
-        category_id: { _id: '', name: '' },
-        description: ''
-      });
+      
       setImage(null);
       setCurrentImage(null);
       onSuccess();
@@ -432,7 +424,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
           </Box>
         </form>
       </FormContainer>
-      
+
       {/* Add comments section after the form */}
       {editingProduct && (
         <Box sx={{ mt: 4 }}>

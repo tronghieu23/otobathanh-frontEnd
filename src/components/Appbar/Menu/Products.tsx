@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { Typography, CardContent, CardMedia, Button, Paper } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import InfoIcon from '@mui/icons-material/Info';
-import { SectionTitle } from '../../styles/SharedStyles';
-import { getAllProductsAPI } from '../../components/API';
+import { SectionTitle } from '../../../Styles/SharedStyles';
+import { getAllProductsAPI } from '../../API';
 import { useNavigate } from 'react-router-dom';
 
 const ProductSection = styled.section`

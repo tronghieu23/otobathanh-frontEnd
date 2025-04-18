@@ -163,36 +163,37 @@ const Contact = () => {
         <ContactInfo>
           <h2>Thông tin liên hệ</h2>
           <p>
-            Honda Ô tô Bá Thành - Đại lý ủy quyền chính thức của Honda Việt Nam. 
-            Chúng tôi luôn sẵn sàng phục vụ quý khách với dịch vụ tốt nhất.
+            Công ty cung cấp nhiều dịch vụ như bảo dưỡng nhanh, đồng sơn cao cấp (DUPONT & 3M), sửa chữa lưu động, và cứu hộ giao thông. Với trang thiết bị hiện đại và đội ngũ kỹ thuật viên chuyên nghiệp, Ô tô Bá Thành cam kết mang đến chất lượng dịch vụ tốt nhất cho khách hàng.
           </p>
           <InfoList>
             <InfoItem>
               <LocationOnIcon />
               <div>
                 <h3>Địa chỉ</h3>
-                <p>123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh</p>
+                <p>462 Phan Văn Trị, Phường 7, Quận Gò Vấp, TP.HCM</p>
+                <p>​19 Phan Văn Trị, Phường 7, Quận Gò Vấp, TP.HCM</p>
               </div>
             </InfoItem>
             <InfoItem>
               <PhoneIcon />
               <div>
                 <h3>Điện thoại</h3>
-                <p>0123.456.789 - 0987.654.321</p>
+                <p>0913.169.066 - 1900.866.876</p>
               </div>
             </InfoItem>
             <InfoItem>
               <EmailIcon />
               <div>
                 <h3>Email</h3>
-                <p>info@hondabathanh.com</p>
+                <p>otobathanh@gmail.com</p>
+                <p>nhan.duong@otobathanh.com</p>
               </div>
             </InfoItem>
             <InfoItem>
               <AccessTimeIcon />
               <div>
                 <h3>Giờ làm việc</h3>
-                <p>Thứ 2 - Chủ nhật: 8:00 - 20:00</p>
+                <p>​Thứ Hai - Thứ Bảy: 7:30 - 17:00</p>
               </div>
             </InfoItem>
           </InfoList>
@@ -223,8 +224,19 @@ const Contact = () => {
       <MapSection>
         <h2>Vị trí của chúng tôi</h2>
         <MapContainer>
-          <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4241674197156!2d106.64037661533417!3d10.77900166219799!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752ec3c161a3fb%3A0xef77cd47a1cc691e!2sHonda%20Vietnam!5e0!3m2!1sen!2s!4v1659429787854!5m2!1sen!2s"
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.872957774987!2d106.684123!3d10.822155!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528d1b2a4b1b3%3A0x3f2c4d5e6f7g8h9i!2s19%20Phan%20V%C4%83n%20Tr%E1%BB%8B%2C%20Ph%C6%B0%E1%BB%9Dng%207%2C%20G%C3%B2%20V%E1%BA%A5p%2C%20TP.HCM!5e0!3m2!1sen!2s!4v1610000000001!5m2!1sen!2s"
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Bản đồ vị trí Honda Ô tô Bá Thành"
+          />
+        </MapContainer>
+      </MapSection>
+      <MapSection>
+        <MapContainer>
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.123456789012!2d106.700000!3d10.830000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528d1b2a4b1b3%3A0x4j5k6l7m8n9o0p1q!2s15%20TL08%2C%20Ph%C6%B0%E1%BB%9Dng%20Th%E1%BA%A1nh%20L%E1%BB%99c%2C%20Qu%E1%BA%ADn%2012%2C%20TP.HCM!5e0!3m2!1sen!2s!4v1610000000002!5m2!1sen!2s"
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"

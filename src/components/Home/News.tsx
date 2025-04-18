@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { SectionTitle } from '../styles/SharedStyles';
-import { getAllNewsAPI } from './API';
+import { SectionTitle } from '../../Styles/SharedStyles';
+import { getAllNewsAPI } from '../API';
 
 const NewsSection = styled.section`
   padding: 60px 0;

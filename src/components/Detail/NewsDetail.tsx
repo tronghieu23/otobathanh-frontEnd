@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getNewsByIdAPI, getAllNewsAPI } from '../components/API';
+import { getNewsByIdAPI, getAllNewsAPI } from '../API';
 
 const NewsContainer = styled.div`
   max-width: 1200px;

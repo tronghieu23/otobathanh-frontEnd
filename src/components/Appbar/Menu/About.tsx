@@ -67,7 +67,7 @@ const About = () => {
   return (
     <AboutContainer>
       <AboutContent>
-        <AboutImage src="../image/showroom.jpg" alt="Honda Ô tô Bá Thành Showroom" />
+        <AboutImage src="../../image/logo192.png" alt="Honda Ô tô Bá Thành Showroom" />
         <AboutText>
           <h2>Giới thiệu chung</h2>
           <p>

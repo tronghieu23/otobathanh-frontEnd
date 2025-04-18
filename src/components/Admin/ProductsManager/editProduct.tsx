@@ -133,9 +133,6 @@ const EditProduct: React.FC<Props> = ({ onEdit }) => {
 
     useEffect(() => {
         fetchProducts();
-    }, []);
-
-    useEffect(() => {
         if (selectedProduct) {
             setFormData({
                 name: selectedProduct.name,

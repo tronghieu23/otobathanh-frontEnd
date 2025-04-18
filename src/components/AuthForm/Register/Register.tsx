@@ -12,8 +12,8 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
 import { useNavigate } from 'react-router-dom';
 import { registerAPI } from '../../API';
-import VerifyAccountForm from './VerifyAccountForm';
-import ForgotPasswordForm from './ForgotPasswordForm';
+import VerifyAccountForm from './VerifyAccount';
+import ForgotPasswordForm from './ForgotPassword';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {

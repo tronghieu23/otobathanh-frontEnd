@@ -161,6 +161,25 @@ export const deleteAccountAPI = async (accountId) => {
     }
 };
 
+export const getAccountByIdAPI = async (accountId) => {
+    try {
+        const response = await fetch(`${API_URL}/api/accounts/${accountId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch account');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching account:', error);
+        throw error;
+    }
+};
+
 // News APIs
 export const getAllNewsAPI = async () => {
     try {
@@ -246,6 +265,26 @@ export const deleteCommentAPI = async (commentId) => {
     return response.data;
   } catch (error) {
     console.error('Error deleting comment:', error);
+    throw error;
+  }
+};
+
+export const getOrdersByAccountAPI = async (accountId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/orders/account/${accountId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    throw error;
+  }
+};
+
+export const deleteOrderAPI = async (orderId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/orders/${orderId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting order:', error);
     throw error;
   }
 };

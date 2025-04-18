@@ -167,7 +167,7 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
         e.preventDefault();
         setError('');
 
-        if (!formData.fullName || !formData.email || !formData.roles.length) {
+        if (!formData.fullName || !formData.email || !formData.roles) {
             setError('Vui lòng điền đầy đủ thông tin');
             return;
         }

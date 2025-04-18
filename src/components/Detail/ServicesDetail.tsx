@@ -153,7 +153,7 @@ const Services = () => {
 
       <ServiceContent>
         <MainContent>
-          <img src="../image/rolls-royce-service.jpg" alt="Dịch vụ bảo dưỡng Rolls-Royce" />
+          <img src="../../image/logo192.png" alt="Dịch vụ bảo dưỡng Rolls-Royce" />
           <p>
             Dịch Vụ Bảo Dưỡng Xe Rolls-Royce tại Garage Ô Tô Vương Phát Đình Cao Chăm Sóc Xe Siêu Sang Giới Thiệu 
             Rolls-Royce – Tuyệt Tác Nghệ Thuật Di Động. Rolls-Royce, biểu tượng của sự tinh hoa và đẳng cấp vượt thời 
@@ -181,11 +181,11 @@ const Services = () => {
         <Sidebar>
           <h3>Dịch vụ khác</h3>
           <ul>
-            <li><a href="/dich-vu/bao-duong-dinh-ky">Bảo dưỡng định kỳ</a></li>
-            <li><a href="/dich-vu/sua-chua-dong-co">Sửa chữa động cơ</a></li>
-            <li><a href="/dich-vu/dong-son">Đồng sơn xe</a></li>
-            <li><a href="/dich-vu/phu-tung">Phụ tùng chính hãng</a></li>
-            <li><a href="/dich-vu/cham-soc-xe">Chăm sóc xe</a></li>
+            <li><a href="">Bảo dưỡng định kỳ</a></li>
+            <li><a href="">Sửa chữa động cơ</a></li>
+            <li><a href="">Đồng sơn xe</a></li>
+            <li><a href="">Phụ tùng chính hãng</a></li>
+            <li><a href="">Chăm sóc xe</a></li>
           </ul>
         </Sidebar>
       </ServiceContent>
