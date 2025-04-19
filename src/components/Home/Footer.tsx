@@ -103,7 +103,7 @@ const Footer = () => {
       <Container>
         <FooterGrid>
           <div>
-            <Logo src="../image/logo192.png" alt="Ô Tô Bá Thành" />
+            <Logo src="../image/logo.png" alt="Ô Tô Bá Thành" />
             <CompanyInfo>
               <Typography variant="h6">ÔTÔ Bá Thành - Dịch Vụ Hoàn Hảo - Tận Tâm và Chuyên Nghiệp</Typography>
               <Typography variant="subtitle1">Sửa Xe Bằng Cả Trái Tim</Typography>

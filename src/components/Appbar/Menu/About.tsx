@@ -67,17 +67,17 @@ const About = () => {
   return (
     <AboutContainer>
       <AboutContent>
-        <AboutImage src="../../image/logo192.png" alt="Honda Ô tô Bá Thành Showroom" />
+        <AboutImage src="../../image/logo.png" alt="Honda Ô tô Bá Thành Showroom" />
         <AboutText>
           <h2>Giới thiệu chung</h2>
           <p>
-            Honda Ô tô Bá Thành là đại lý ủy quyền chính thức của Honda Việt Nam, 
-            chuyên phân phối các dòng xe Honda chính hãng và cung cấp dịch vụ bảo dưỡng, 
+            Honda Ô tô Bá Thành là đại lý ủy quyền chính thức của Honda Việt Nam,
+            chuyên phân phối các dòng xe Honda chính hãng và cung cấp dịch vụ bảo dưỡng,
             sửa chữa theo tiêu chuẩn Honda toàn cầu.
           </p>
           <h2>Tầm nhìn</h2>
           <p>
-            Trở thành đại lý Honda hàng đầu tại khu vực, mang đến trải nghiệm 
+            Trở thành đại lý Honda hàng đầu tại khu vực, mang đến trải nghiệm
             tuyệt vời và sự hài lòng cao nhất cho khách hàng.
           </p>
           <h2>Giá trị cốt lõi</h2>

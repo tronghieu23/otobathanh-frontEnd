@@ -153,10 +153,10 @@ const Services = () => {
 
       <ServiceContent>
         <MainContent>
-          <img src="../../image/logo192.png" alt="Dịch vụ bảo dưỡng Rolls-Royce" />
+          <img src="../../image/logo.png" alt="Dịch vụ bảo dưỡng Rolls-Royce" />
           <p>
-            Dịch Vụ Bảo Dưỡng Xe Rolls-Royce tại Garage Ô Tô Vương Phát Đình Cao Chăm Sóc Xe Siêu Sang Giới Thiệu 
-            Rolls-Royce – Tuyệt Tác Nghệ Thuật Di Động. Rolls-Royce, biểu tượng của sự tinh hoa và đẳng cấp vượt thời 
+            Dịch Vụ Bảo Dưỡng Xe Rolls-Royce tại Garage Ô Tô Vương Phát Đình Cao Chăm Sóc Xe Siêu Sang Giới Thiệu
+            Rolls-Royce – Tuyệt Tác Nghệ Thuật Di Động. Rolls-Royce, biểu tượng của sự tinh hoa và đẳng cấp vượt thời
             gian, không chỉ là một phương tiện di chuyển, mà còn là một tuyệt tác nghệ thuật di động.
           </p>
 
