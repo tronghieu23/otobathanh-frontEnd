@@ -2,6 +2,8 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3000';
 
+
+// Account APIs
 export const loginAPI = async (email, password) => {
     const response = await axios.post(`${API_URL}/api/accounts/login`, {
         email,
@@ -49,6 +51,7 @@ export const resetPasswordAPI = async (email, verificationCode, newPassword) => 
     return response.data;
 };
 
+// Product APIs
 export const getAllProductsAPI = async () => {
     const response = await axios.get(`${API_URL}/api/products`);
     return response.data;
@@ -81,7 +84,7 @@ export const getProductByIdAPI = async (productId) => {
     }
 };
 
-// Account APIs
+// Manager Account APIs
 export const getAllAccountsAPI = async () => {
     try {
         const response = await fetch('http://localhost:3000/api/accounts', {
@@ -269,6 +272,7 @@ export const deleteCommentAPI = async (commentId) => {
   }
 };
 
+// Order APIs
 export const getOrdersByAccountAPI = async (accountId) => {
   try {
     const response = await axios.get(`${API_URL}/api/orders/account/${accountId}`);
@@ -285,6 +289,53 @@ export const deleteOrderAPI = async (orderId) => {
     return response.data;
   } catch (error) {
     console.error('Error deleting order:', error);
+    throw error;
+  }
+};
+
+// Cart APIs
+export const addToCartAPI = async (cartData) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/cart`, {
+      quantity: cartData.quantity,
+      product_id: cartData.product_id,
+      account_id: cartData.account_id
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    throw error;
+  }
+};
+
+export const getCartItemsAPI = async (accountId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/cart/${accountId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching cart items:', error);
+    throw error;
+  }
+};
+
+export const updateCartItemAPI = async (cartItemId, quantity) => {
+  try {
+    const response = await axios.put(`${API_URL}/api/cart/${cartItemId}`, {
+      quantity: quantity
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating cart item:', error);
+    throw error;
+  }
+};
+
+export const removeFromCartAPI = async (cartItemId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/cart/${cartItemId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error removing from cart:', error);
     throw error;
   }
 };

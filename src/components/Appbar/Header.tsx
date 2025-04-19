@@ -6,7 +6,9 @@ import RegisterForm from '../AuthForm/Register/Register';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { getCurrentUser, handleLogout } from '../Utils/auth';
-import { getAccountByIdAPI } from '../API';
+import { getAccountByIdAPI, getCartItemsAPI, removeFromCartAPI } from '../API';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { useNavigate } from 'react-router-dom';
 
 const HeaderContainer = styled.header`
   background-color: #1e2124;
@@ -21,6 +23,43 @@ const HeaderContainer = styled.header`
   @media (max-width: 768px) {
     padding: 8px 0;
   }
+`;
+
+// Change CartButton from button to div
+const CartButton = styled.div`
+  background: none;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 15px;
+  position: relative;
+  
+  &:hover {
+    color: #e31837;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const CartBadge = styled.span`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #e31837;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  min-width: 18px;
+  text-align: center;
 `;
 
 const HeaderContent = styled.div`
@@ -318,6 +357,109 @@ const DropdownButton = styled.button`
   }
 `;
 
+const CartPreviewContainer = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  background-color: #1e2124;
+  border-radius: 4px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1002;
+  display: none;
+  padding: 8px;
+
+  ${CartButton}:hover & {
+    display: block;
+  }
+`;
+
+// Add new styled component for delete button
+const DeleteItemButton = styled.button`
+  background: none;
+  border: none;
+  color: #888;
+  padding: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 8px;
+  
+  &:hover {
+    color: #e31837;
+    transform: scale(1.1);
+  }
+`;
+
+// Update CartItemPreview to include delete button
+const CartItemPreview = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const CartItemImage = styled.img`
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 10px;
+`;
+
+const CartItemInfo = styled.div`
+  flex: 1;
+`;
+
+const CartItemName = styled.div`
+  color: white;
+  font-size: 14px;
+  margin-bottom: 4px;
+`;
+
+const CartItemPrice = styled.div`
+  color: #e31837;
+  font-weight: 500;
+  font-size: 13px;
+`;
+
+const CartItemQuantity = styled.span`
+  color: #888;
+  font-size: 12px;
+  margin-left: 8px;
+`;
+
+const ViewCartButton = styled(AuthButton)`
+  width: 100%;
+`;
+
+const ClearCartButton = styled(AuthButton)`
+  width: 100%;
+  background-color: #666;
+  border-color: #666;
+  
+  &:hover {
+    background-color: #555;
+    border-color: #555;
+  }
+`;
+
+// Add this new interface for cart items
+interface CartItem {
+  _id: string;
+  quantity: number;
+  product_id: {
+    _id: string;
+    name: string;
+    price: number;
+    image: string;
+  };
+}
+
 const Header = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -325,8 +467,24 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userImage, setUserImage] = useState('');  // Add this state
   const user = getCurrentUser();
+  const [cartCount, setCartCount] = useState(0);
+  const navigate = useNavigate();
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
+  // Update the useEffect to set both cartCount and cartItems
   useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        if (user?.id) {
+          const items = await getCartItemsAPI(user.id);
+          setCartItems(items);
+          setCartCount(items.length);
+        }
+      } catch (error) {
+        console.error('Error fetching cart items:', error);
+      }
+    };
+
     const fetchUserData = async () => {
       try {
         if (user?.id) {
@@ -340,10 +498,20 @@ const Header = () => {
       }
     };
 
+    fetchCartItems();
     fetchUserData();
   }, [user]);
 
-  // In the render section, update the UserAvatar src
+  const removeCartItem = async (e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation();
+    try {
+      await removeFromCartAPI(itemId);
+      setCartItems(prevItems => prevItems.filter(item => item._id !== itemId));
+      setCartCount(prev => prev - 1);
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+    }
+  };
   return (
     <HeaderContainer>
       <HeaderContent>
@@ -374,16 +542,73 @@ const Header = () => {
             </NavLink>
           </NavLinks>
         </NavContainer>
-        
+
         <AuthContainer>
+          <CartButton>
+            <div onClick={() => navigate('/cart/cartDetail')}>
+              <ShoppingCartIcon />
+              {cartCount > 0 && <CartBadge>{cartCount}</CartBadge>}
+            </div>
+            {cartItems.length > 0 && (
+              <CartPreviewContainer>
+                {cartItems.map((item) => (
+                  <CartItemPreview key={item._id}>
+                    <CartItemImage
+                      src={item.product_id.image}
+                      alt={item.product_id.name}
+                    />
+                    <CartItemInfo>
+                      <CartItemName>
+                        {item.product_id.name.length > 30
+                          ? `${item.product_id.name.substring(0, 30)}...`
+                          : item.product_id.name}
+                      </CartItemName>
+                      <CartItemPrice>
+                        {new Intl.NumberFormat('vi-VN', {
+                          style: 'currency',
+                          currency: 'VND'
+                        }).format(item.product_id.price)}
+                        <CartItemQuantity>x{item.quantity}</CartItemQuantity>
+                      </CartItemPrice>
+                    </CartItemInfo>
+                    <DeleteItemButton
+                      onClick={(e) => removeCartItem(e, item._id)}
+                    >
+                      ✕
+                    </DeleteItemButton>
+                  </CartItemPreview>
+                ))}
+                <ButtonGroup>
+                  <ViewCartButton
+                    $primary
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/cart/cartDetail');
+                    }}
+                  >
+                    Xem giỏ hàng
+                  </ViewCartButton>
+                  <ClearCartButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCartItems([]);
+                      setCartCount(0);
+                    }}
+                  >
+                    Xóa giỏ hàng
+                  </ClearCartButton>
+                </ButtonGroup>
+              </CartPreviewContainer>
+            )}
+          </CartButton>
           {user ? (
             <UserInfo>
               <UserDropdown>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   {(userImage || user.image) && (
-                    <UserAvatar 
-                      src={userImage || user.image} 
-                      alt={user.fullName} 
+                    <UserAvatar
+                      src={userImage || user.image}
+                      alt={user.fullName}
                     />
                   )}
                   <UserName>

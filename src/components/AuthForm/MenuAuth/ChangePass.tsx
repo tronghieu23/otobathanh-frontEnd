@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { getAccountByIdAPI } from '../../API';
+import { getAccountByIdAPI, loginAPI } from '../../API';
 import { getCurrentUser } from '../../Utils/auth';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -124,12 +124,10 @@ const ChangePass = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
-        email: formData.email,
-        password: formData.oldPassword,
-      });
+      const response = await loginAPI(formData.email, formData.oldPassword);
+      console.log(response);
 
-      if (response.data) {
+      if (response) {
         setIsVerified(true);
         setSuccess('Xác thực thành công. Vui lòng nhập mật khẩu mới.');
       }
@@ -149,7 +147,7 @@ const ChangePass = () => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:5000/api/accounts/${user?.id}/change-password`, {
+      const response = await axios.put(`http://localhost:3000/api/accounts/${user?.id}/change-password`, {
         newPassword: formData.newPassword,
       });
 

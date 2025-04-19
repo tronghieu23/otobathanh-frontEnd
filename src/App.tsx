@@ -24,6 +24,7 @@ import UpdateAccount from './components/AuthForm/MenuAuth/UpdateAccount';
 import ChangePass from './components/AuthForm/MenuAuth/ChangePass';
 import HistoryOrder from './components/AuthForm/MenuAuth/HistoryOrder';
 import LikeProducts from './components/AuthForm/MenuAuth/LikeProducts';
+import CartDetail from './components/Detail/CartDetail';
 
 const MainContent = styled.main`
   margin-top: 80px;
@@ -60,6 +61,7 @@ const App = () => {
           <Route path="/account/changePass" element={<ChangePass />} />
           <Route path="/account/historyOrder" element={<HistoryOrder />} />
           <Route path="/account/likeProducts" element={<LikeProducts />} />
+          <Route path="/cart/cartDetail" element={<CartDetail />} />
         </Routes>
         <Footer />
       </MainContent>
