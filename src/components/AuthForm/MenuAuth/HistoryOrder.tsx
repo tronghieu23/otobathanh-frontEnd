@@ -38,10 +38,10 @@ const Td = styled.td`
 `;
 
 const Button = styled.button<{ $variant?: string }>`
-  background-color: ${props => 
+  background-color: ${props =>
     props.$variant === 'delete' ? '#e31837' :
-    props.$variant === 'view' ? '#007bff' :
-    props.$variant === 'shop' ? '#28a745' : '#e31837'
+      props.$variant === 'view' ? '#007bff' :
+        props.$variant === 'shop' ? '#28a745' : '#e31837'
   };
   color: white;
   padding: 8px 16px;
@@ -53,13 +53,6 @@ const Button = styled.button<{ $variant?: string }>`
   &:hover {
     opacity: 0.9;
   }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 30px;
 `;
 
 const ActionContainer = styled.div`
@@ -83,11 +76,13 @@ const HistoryOrder = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        if (user?.id) {
+        if (user?.id) { // Change from user.id to user._id
+          setLoading(true);
           const response = await getOrdersByAccountAPI(user.id);
-          setOrders(response.orders || []);
+          setOrders(response || []); // Remove .orders since the API returns the array directly
         }
       } catch (err) {
+        console.error('Error fetching orders:', err);
         setError('Không thể tải lịch sử đơn hàng');
       } finally {
         setLoading(false);
@@ -95,7 +90,7 @@ const HistoryOrder = () => {
     };
 
     fetchOrders();
-  }, [user]);
+  }, []);
 
   const handleDelete = async (orderId: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
@@ -108,10 +103,6 @@ const HistoryOrder = () => {
     }
   };
 
-  const handleViewDetails = (orderId: string) => {
-    navigate(`/orders/${orderId}`);
-  };
-
   if (loading) {
     return <Container>Đang tải...</Container>;
   }
@@ -119,7 +110,7 @@ const HistoryOrder = () => {
   return (
     <Container>
       <Title>Lịch Sử Đơn Hàng</Title>
-      
+
       {orders.length > 0 ? (
         <Table>
           <thead>
@@ -142,14 +133,14 @@ const HistoryOrder = () => {
                   {new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'
-                  }).format(order.totalAmount)}
+                  }).format(order.total)}
                 </Td>
                 <Td>{order.status}</Td>
                 <Td>
                   <ActionContainer>
                     <Button
                       $variant="view"
-                      onClick={() => handleViewDetails(order._id)}
+                      onClick={() => navigate(`/order/orderDetail/${order._id}`)}
                     >
                       Xem chi tiết
                     </Button>
@@ -170,15 +161,6 @@ const HistoryOrder = () => {
       )}
 
       {error && <EmptyMessage style={{ color: '#e31837' }}>{error}</EmptyMessage>}
-
-      <ButtonContainer>
-        <Button $variant="shop" onClick={() => navigate('/products')}>
-          Quay lại cửa hàng
-        </Button>
-        <Button onClick={() => navigate('/checkout')}>
-          Thanh toán
-        </Button>
-      </ButtonContainer>
     </Container>
   );
 };

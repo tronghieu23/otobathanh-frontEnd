@@ -7,7 +7,7 @@ import Products from './components/Appbar/Menu/Products';
 import Information from './components/Home/Infor';
 import Footer from './components/Home/Footer';
 import ChatBox from './components/Chatbox/ChatBox';
-import Breadcrumb from './Styles/Breadcrumb';
+import Breadcrumb from './components/Styles/Breadcrumb';
 import About from './components/Appbar/Menu/About';
 import Services from './components/Detail/ServicesDetail';
 import Contact from './components/Appbar/Menu/Contact';
@@ -25,6 +25,8 @@ import ChangePass from './components/AuthForm/MenuAuth/ChangePass';
 import HistoryOrder from './components/AuthForm/MenuAuth/HistoryOrder';
 import LikeProducts from './components/AuthForm/MenuAuth/LikeProducts';
 import CartDetail from './components/Detail/CartDetail';
+import Order from './components/Home/Order';
+import OrderDetail from './components/Detail/OrderDetail';
 
 const MainContent = styled.main`
   margin-top: 80px;
@@ -62,6 +64,8 @@ const App = () => {
           <Route path="/account/historyOrder" element={<HistoryOrder />} />
           <Route path="/account/likeProducts" element={<LikeProducts />} />
           <Route path="/cart/cartDetail" element={<CartDetail />} />
+          <Route path="/order/checkout" element={<Order />} />
+          <Route path="/order/orderDetail/:orderId" element={<OrderDetail />} />
         </Routes>
         <Footer />
       </MainContent>

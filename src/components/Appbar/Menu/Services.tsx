@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { SectionTitle } from '../../../Styles/SharedStyles';
+import { SectionTitle } from '../../Styles/StylesComponents';
 import BuildIcon from '@mui/icons-material/Build';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import ColorLensIcon from '@mui/icons-material/ColorLens';

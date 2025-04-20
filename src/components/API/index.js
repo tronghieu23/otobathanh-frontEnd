@@ -272,27 +272,6 @@ export const deleteCommentAPI = async (commentId) => {
   }
 };
 
-// Order APIs
-export const getOrdersByAccountAPI = async (accountId) => {
-  try {
-    const response = await axios.get(`${API_URL}/api/orders/account/${accountId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-    throw error;
-  }
-};
-
-export const deleteOrderAPI = async (orderId) => {
-  try {
-    const response = await axios.delete(`${API_URL}/api/orders/${orderId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error deleting order:', error);
-    throw error;
-  }
-};
-
 // Cart APIs
 export const addToCartAPI = async (cartData) => {
   try {
@@ -336,6 +315,91 @@ export const removeFromCartAPI = async (cartItemId) => {
     return response.data;
   } catch (error) {
     console.error('Error removing from cart:', error);
+    throw error;
+  }
+};
+
+// Order APIs
+export const createOrderAPI = async (orderData) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/orders`, {
+      account_id: orderData.account_id,
+      phone: orderData.phone,
+      name: orderData.name,
+      email: orderData.email,
+      payment_method: orderData.payment_method,
+      note: orderData.note
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating order:', error);
+    throw error;
+  }
+};
+
+export const getOrdersByAccountAPI = async (accountId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/orders/account/${accountId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    throw error;
+  }
+};
+
+export const updateOrderStatusAPI = async (orderId, status) => {
+  try {
+    const response = await axios.put(`${API_URL}/api/orders/${orderId}`, {
+      status: status
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    throw error;
+  }
+};
+
+export const deleteOrderAPI = async (orderId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/orders/${orderId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    throw error;
+  }
+};
+
+export const getOrderDetailsAPI = async (orderId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/orders/detail/${orderId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    throw error;
+  }
+};
+
+export const addOrderDetailAPI = async (orderDetailData) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/orders/detail`, {
+      order_id: orderDetailData.order_id,
+      product_id: orderDetailData.product_id,
+      quantity: orderDetailData.quantity,
+      price: orderDetailData.price
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding order detail:', error);
+    throw error;
+  }
+};
+
+export const deleteOrderDetailAPI = async (detailId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/orders/detail/${detailId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting order detail:', error);
     throw error;
   }
 };

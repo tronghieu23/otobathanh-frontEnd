@@ -100,6 +100,14 @@ const EmptyCart = styled.div`
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 `;
 
+const CartTitle = styled.h3`
+    font-size: 28px;
+    color: #1e2124;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e31837;
+  `;
+
 const TotalPrice = styled.div`
   text-align: right;
   margin-top: 16px;
@@ -140,7 +148,7 @@ const CartDetail = () => {
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
-    
+
     try {
       await updateCartItemAPI(itemId, newQuantity);
       setCartItems(prevItems =>
@@ -163,7 +171,7 @@ const CartDetail = () => {
   };
 
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => 
+    return cartItems.reduce((total, item) =>
       total + (item.product_id.price * item.quantity), 0
     );
   };
@@ -177,23 +185,13 @@ const CartDetail = () => {
       </CartContainer>
     );
   }
-
-  // Add new styled component for the title
-  const CartTitle = styled.h1`
-    font-size: 28px;
-    color: #1e2124;
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e31837;
-  `;
-  
   // Update the CartContainer section
   return (
     <CartContainer>
-      <CartTitle>Chi tiết đơn hàng</CartTitle>
+      <CartTitle>Chi tiết giỏ hàng</CartTitle>
       {cartItems.length === 0 ? (
         <EmptyCart>
-          <h2>Giỏ hàng trống</h2>
+          <h1>Giỏ hàng trống</h1>
           <ActionButton onClick={() => navigate('/products')}>
             Quay lại mua sắm
           </ActionButton>
@@ -257,7 +255,7 @@ const CartDetail = () => {
               ))}
             </tbody>
           </CartTable>
-          
+
           <TotalPrice>
             Tổng tiền: {new Intl.NumberFormat('vi-VN', {
               style: 'currency',
@@ -269,7 +267,7 @@ const CartDetail = () => {
             <ActionButton onClick={() => navigate('/products')}>
               Tiếp tục mua sắm
             </ActionButton>
-            <ActionButton $primary onClick={() => navigate('/checkout')}>
+            <ActionButton onClick={() => navigate('/order/checkout')}>
               Đặt hàng
             </ActionButton>
           </ButtonGroup>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { SectionTitle } from '../../Styles/SharedStyles';
+import { SectionTitle } from '../Styles/StylesComponents';
 import { getAllNewsAPI } from '../API';
 
 const NewsSection = styled.section`

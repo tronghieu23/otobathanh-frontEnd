@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { Typography, CardContent, CardMedia, Button, Paper } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { SectionTitle } from '../../../Styles/SharedStyles';
+import { SectionTitle } from '../../Styles/StylesComponents';
 import { getAllProductsAPI, addToCartAPI } from '../../API';
 import { useNavigate } from 'react-router-dom';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';

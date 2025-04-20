@@ -5,7 +5,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BuildIcon from '@mui/icons-material/Build';
 import PhoneIcon from '@mui/icons-material/Phone';
-import { SectionTitle } from '../../Styles/SharedStyles';
+import { SectionTitle } from '../Styles/StylesComponents';
 
 const shake = keyframes`
   0% { transform: rotate(0deg); }
