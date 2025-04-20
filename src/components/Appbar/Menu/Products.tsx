@@ -3,7 +3,7 @@ import styled, { keyframes } from 'styled-components';
 import { Typography, CardContent, CardMedia, Button, Paper } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { SectionTitle } from '../../Styles/StylesComponents';
-import { getAllProductsAPI, addToCartAPI } from '../../API';
+import { getAllProductsAPI, addToCartAPI, getCartItemsAPI } from '../../API';
 import { useNavigate } from 'react-router-dom';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -159,8 +159,31 @@ const LikeButton = styled(Button)`
   }
 `;
 
+// Add quantity to the product interface at the top
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  quantity: number; // Add this
+  image: string;
+  description: string;
+}
+
+interface CartItem {
+  _id: string;
+  quantity: number;
+  product_id: {
+    _id: string;
+    name: string;
+    price: number;
+    quantity: number;
+  };
+}
+
 const Products = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  // Update useState type
+  const [products, setProducts] = useState<Product[]>([]);
+  
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const navigate = useNavigate();
   const user = getCurrentUser();
@@ -226,18 +249,33 @@ const Products = () => {
     navigate(`/products/${productId}`);
   };
 
-  const handleAddToCart = async (e: React.MouseEvent, product: any) => {
-    e.stopPropagation(); // Prevent navigation to product detail
+  const handleAddToCart = async (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
 
-    // Check if user is logged in
     if (!user || !user.id) {
       navigate('/');
       return;
     }
 
     try {
+      if (product.quantity < 1) {
+        alert('Sản phẩm đã hết hàng!');
+        return;
+      }
+
+      // Get current cart items to check quantity
+      const cartItems = await getCartItemsAPI(user.id);
+      const existingCartItem = cartItems.find((item: CartItem) => item.product_id._id === product._id);
+      const currentCartQuantity = existingCartItem ? existingCartItem.quantity : 0;
+
+      // Check if adding one more would exceed available quantity
+      if (currentCartQuantity + 1 > product.quantity) {
+        alert(`Không thể thêm vào giỏ hàng. Chỉ còn ${product.quantity} sản phẩm trong kho!`);
+        return;
+      }
+
       const cartData = {
-        quantity: 1, // Default quantity
+        quantity: 1,
         product_id: product._id,
         account_id: user.id
       };
@@ -245,9 +283,11 @@ const Products = () => {
       await addToCartAPI(cartData);
     } catch (error) {
       console.error('Failed to add to cart:', error);
+      alert('Không thể thêm vào giỏ hàng');
     }
   };
 
+  // In the render section, add quantity display
   return (
     <ProductSection>
       <ProductContainer>
@@ -282,6 +322,9 @@ const Products = () => {
                 <ProductPrice variant="h6">
                   {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
                 </ProductPrice>
+                <Typography variant="body2" color={product.quantity > 0 ? "success.main" : "error.main"}>
+                  {product.quantity > 0 ? `Còn ${product.quantity} sản phẩm` : 'Hết hàng'}
+                </Typography>
                 <ButtonGroup>
                   <LikeButton
                     onClick={(e) => handleLike(e, product._id)}

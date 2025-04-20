@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getProductByIdAPI, getAllProductsAPI, createCommentAPI, getCommentsByProductIdAPI } from '../API';
+import { getProductByIdAPI, addToCartAPI, getAllProductsAPI, createCommentAPI, getCommentsByProductIdAPI, getCartItemsAPI } from '../API';
 import { getCurrentUser } from '../Utils/auth';
 
 // Styled Components for layout and design
@@ -92,6 +92,7 @@ const ContactButton = styled.button`
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
+  margin-right: 20px;
   transition: background-color 0.3s ease;
 
   &:hover {
@@ -107,19 +108,6 @@ const Sidebar = styled.div`
     text-transform: uppercase;
   }
 `;
-
-// Interface for Product data structure
-interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  description: string;
-  image: string;
-  specifications: {
-    label: string;
-    value: string;
-  }[];
-}
 
 // Add these styled components after your existing styled components
 const CommentSection = styled.div`
@@ -175,19 +163,6 @@ const CommentHeader = styled.div`
   color: #666;
 `;
 
-// Add this interface before the Product interface
-// Update the Comment interface
-interface Comment {
-  _id: string;
-  comment: string;
-  account: {
-    _id: string;
-    fullName: string;
-  };
-  product: string;
-  createdAt: string;
-}
-
 // Add this styled component for related products
 const RelatedProductsList = styled.ul`
   list-style: none;
@@ -206,20 +181,48 @@ const RelatedProductsList = styled.ul`
   }
 `;
 
-// Remove the standalone handleCommentSubmit and CommentList
+// Interface for Product data structure
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  description: string;
+  image: string;
+  specifications: {
+    label: string;
+    value: string;
+  }[];
+}
 
-// Add this interface near other interfaces
-interface User {
-  id: string;
-  fullName: string;
-  email: string;
+interface CartItem {
+  _id: string;
+  quantity: number;
+  product_id: {
+    _id: string;
+    name: string;
+    price: number;
+    quantity: number;
+  };
+}
+
+// Update the Comment interface
+interface Comment {
+  _id: string;
+  comment: string;
+  account: {
+    _id: string;
+    fullName: string;
+  };
+  product: string;
+  createdAt: string;
 }
 
 const ProductPage = () => {
-  
+
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -240,7 +243,7 @@ const ProductPage = () => {
           comment: newComment,
           accountId: user.id
         };
-        
+
         const response = await createCommentAPI(commentData);
         if (response) {
           const updatedComments = await getCommentsByProductIdAPI(id);
@@ -298,6 +301,44 @@ const ProductPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [id, navigate]); // Re-run effect when ID changes
 
+  const handleAddToCart = async (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
+
+    if (!user || !user.id) {
+      navigate('/');
+      return;
+    }
+
+    try {
+      if (product.quantity < 1) {
+        alert('Sản phẩm đã hết hàng!');
+        return;
+      }
+
+      // Get current cart items to check quantity
+      const cartItems = await getCartItemsAPI(user.id);
+      const existingCartItem = cartItems.find((item: CartItem) => item.product_id._id === product._id);
+      const currentCartQuantity = existingCartItem ? existingCartItem.quantity : 0;
+
+      // Check if adding one more would exceed available quantity
+      if (currentCartQuantity + 1 > product.quantity) {
+        alert(`Không thể thêm vào giỏ hàng. Chỉ còn ${product.quantity} sản phẩm trong kho!`);
+        return;
+      }
+
+      const cartData = {
+        quantity: 1,
+        product_id: product._id,
+        account_id: user.id
+      };
+
+      await addToCartAPI(cartData);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      alert('Không thể thêm vào giỏ hàng');
+    }
+  };
+
   // Show loading state while fetching data
   if (!product && id) {
     return <div>Loading...</div>;
@@ -320,10 +361,10 @@ const ProductPage = () => {
             <MainContent>
               {/* Product Image */}
               <img src={product.image} alt={product.name} />
-              
+
               {/* Product Description */}
               <ProductDescription>{product.description}</ProductDescription>
-              
+
               {/* Technical Specifications */}
               {product.specifications && product.specifications.length > 0 && (
                 <SpecificationList>
@@ -337,6 +378,11 @@ const ProductPage = () => {
               )}
 
               {/* Contact Button */}
+              <ContactButton
+                onClick={(e) => handleAddToCart(e, product)}
+              >
+                Mua ngay
+              </ContactButton>
               <ContactButton onClick={() => navigate('/contact')}>
                 Liên hệ tư vấn
               </ContactButton>

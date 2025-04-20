@@ -115,6 +115,15 @@ const TotalPrice = styled.div`
   font-weight: 500;
 `;
 
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  quantity: number; // Add this
+  image: string;
+  description: string;
+}
+
 interface CartItem {
   _id: string;
   quantity: number;
@@ -123,6 +132,7 @@ interface CartItem {
     name: string;
     price: number;
     image: string;
+    quantity: number;
   };
 }
 
@@ -150,6 +160,15 @@ const CartDetail = () => {
     if (newQuantity < 1) return;
 
     try {
+
+      const item = cartItems.find(item => item._id === itemId);
+      if (!item) return;
+
+      if (newQuantity > item.product_id.quantity) {
+        alert(`Không thể thêm vào giỏ hàng. Chỉ còn ${item.product_id.quantity} sản phẩm trong kho!`);
+        return;
+      }
+
       await updateCartItemAPI(itemId, newQuantity);
       setCartItems(prevItems =>
         prevItems.map(item =>
