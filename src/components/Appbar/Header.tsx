@@ -311,6 +311,15 @@ const DropdownContent = styled.div<{ $isOpen: boolean }>`
   }
 `;
 
+const ManagerDropdown = styled.div`
+  position: relative;
+  display: inline-block;
+
+  &:hover ${DropdownContent} {
+    display: block;
+  }
+`;
+
 // Then define UserDropdown that references DropdownContent
 const UserDropdown = styled.div`
   position: relative;
@@ -460,6 +469,11 @@ interface CartItem {
   };
 }
 
+interface Role {
+  _id: string;
+  name: string;
+}
+
 const Header = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -470,8 +484,8 @@ const Header = () => {
   const [cartCount, setCartCount] = useState(0);
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Update the useEffect to set both cartCount and cartItems
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
@@ -484,23 +498,28 @@ const Header = () => {
         console.error('Error fetching cart items:', error);
       }
     };
-
+  
     const fetchUserData = async () => {
       try {
         if (user?.id) {
           const response = await getAccountByIdAPI(user.id);
-          if (response && response.account && response.account.image) {
-            setUserImage(response.account.image);
+          if (response && response.account) {
+            setUserImage(response.account.image || '');
+            // Check admin role from fetched account data
+            const hasAdminRole = response.account.roles?.some(
+              (role: Role) => role.name.toLowerCase() === 'admin'
+            );
+            setIsAdmin(hasAdminRole);
           }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
     };
-
+  
     fetchCartItems();
     fetchUserData();
-  }, [user]);
+  }, [user]); // Add user as dependency
 
   const removeCartItem = async (e: React.MouseEvent, itemId: string) => {
     e.stopPropagation();
@@ -540,6 +559,24 @@ const Header = () => {
             <NavLink to="/contact">
               Liên hệ
             </NavLink>
+            {isAdmin && (
+              <ManagerDropdown>
+                <NavLink to="/manager">
+                  Quản lý
+                </NavLink>
+                <DropdownContent $isOpen={false}>
+                  <DropdownItem to="/manager/accounts">
+                    Quản lý tài khoản
+                  </DropdownItem>
+                  <DropdownItem to="/manager/products">
+                    Quản lý sản phẩm
+                  </DropdownItem>
+                  <DropdownItem to="/manager/news">
+                    Quản lý tin tức
+                  </DropdownItem>
+                </DropdownContent>
+              </ManagerDropdown>
+            )}
           </NavLinks>
         </NavContainer>
 
@@ -668,6 +705,19 @@ const Header = () => {
               <NavLink to="/contact" onClick={() => setIsMenuOpen(false)}>
                 Liên hệ
               </NavLink>
+              {isAdmin && (
+                <>
+                  <NavLink to="/manager/accounts" onClick={() => setIsMenuOpen(false)}>
+                    Quản lý tài khoản
+                  </NavLink>
+                  <NavLink to="/manager/products" onClick={() => setIsMenuOpen(false)}>
+                    Quản lý sản phẩm
+                  </NavLink>
+                  <NavLink to="/manager/news" onClick={() => setIsMenuOpen(false)}>
+                    Quản lý tin tức
+                  </NavLink>
+                </>
+              )}
             </NavLinks>
             {user ? (
               <UserInfo>

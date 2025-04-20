@@ -114,7 +114,6 @@ interface Props {
 }
 
 const EditProduct: React.FC<Props> = ({ onEdit }) => {
-    const navigate = useNavigate();
     const [products, setProducts] = useState<Product[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -161,6 +160,13 @@ const EditProduct: React.FC<Props> = ({ onEdit }) => {
         }
     };
 
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(price);
+    };
+
     const handleEdit = (product: Product) => {
         onEdit(product);
     };
@@ -178,28 +184,53 @@ const EditProduct: React.FC<Props> = ({ onEdit }) => {
         }
     };
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.category_id && product.category_id.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(price);
-    };
-
+    // Add these new states after existing useState declarations
+    const [searchCategory, setSearchCategory] = useState('all');
+    const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+    
+    // Update the filteredProducts logic
+    const filteredProducts = products.filter(product => {
+        const nameMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const categoryMatch = product.category_id.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const descriptionMatch = product.description.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // Price range filter
+        const priceInRange = (!priceRange.min || product.price >= Number(priceRange.min)) &&
+                            (!priceRange.max || product.price <= Number(priceRange.max));
+    
+        return (nameMatch || categoryMatch || descriptionMatch) && priceInRange;
+    });
+    
+    // Add this in the return statement after the existing SearchInput
     return (
         <Container>
             <Header>
                 <Title>Quản lý sản phẩm</Title>
-                <SearchInput
-                    type="text"
-                    placeholder="Tìm kiếm sản phẩm..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <SearchInput
+                        type="text"
+                        placeholder="Tìm kiếm theo tên, danh mục, mô tả..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <input
+                            type="number"
+                            placeholder="Giá từ"
+                            value={priceRange.min}
+                            onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                            style={{ width: '100px', padding: '8px' }}
+                        />
+                        <span>-</span>
+                        <input
+                            type="number"
+                            placeholder="Giá đến"
+                            value={priceRange.max}
+                            onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                            style={{ width: '100px', padding: '8px' }}
+                        />
+                    </div>
+                </div>
             </Header>
 
             {error && <ErrorMessage>{error}</ErrorMessage>}

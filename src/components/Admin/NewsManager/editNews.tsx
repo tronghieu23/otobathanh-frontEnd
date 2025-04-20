@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
-    IconButton,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -57,15 +57,6 @@ const StyledTableContainer = styled(TableContainer)`
 
 const StyledPaper = styled(Paper)`
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-`;
-
-const ErrorMessage = styled.div`
-  color: #dc3545;
-  font-size: 14px;
-  margin: 8px 0;
-  padding: 8px;
-  background-color: #ffebee;
-  border-radius: 4px;
 `;
 
 interface News {
@@ -125,24 +116,71 @@ const EditNews: React.FC<Props> = ({ onEdit }) => {
     }
   };
 
-  const filteredNews = news.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Add these new states after existing useState declarations
+  const [searchType, setSearchType] = useState('title'); // 'title' or 'content'
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Add styled components for the search controls
+  const SearchControls = styled.div`
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  `;
+
+  const SearchSelect = styled.select`
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  `;
+
+  // Update the filteredNews logic
+  const filteredAndSortedNews = news
+    .filter(item => {
+      const searchValue = searchTerm.toLowerCase();
+      switch (searchType) {
+        case 'title':
+          return item.title.toLowerCase().includes(searchValue);
+        case 'content':
+          return item.content.toLowerCase().includes(searchValue);
+        default:
+          return true;
+      }
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+  // Update the Header section in the return statement
   return (
     <Container>
       <Header>
         <Title>Quản lý tin tức</Title>
-        <SearchInput
-          type="text"
-          placeholder="Tìm kiếm tin tức..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <SearchControls>
+          <SearchSelect
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="title">Tìm theo tiêu đề</option>
+            <option value="content">Tìm theo nội dung</option>
+          </SearchSelect>
+          <SearchInput
+            type="text"
+            placeholder={`Tìm kiếm theo ${searchType === 'title' ? 'tiêu đề' : 'nội dung'}...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <SearchSelect
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+          >
+            <option value="desc">Mới nhất</option>
+            <option value="asc">Cũ nhất</option>
+          </SearchSelect>
+        </SearchControls>
       </Header>
-
-      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <StyledTableContainer>
         <StyledPaper>
@@ -161,12 +199,12 @@ const EditNews: React.FC<Props> = ({ onEdit }) => {
                 <TableRow>
                   <TableCell colSpan={5} align="center">Đang tải...</TableCell>
                 </TableRow>
-              ) : filteredNews.length === 0 ? (
+              ) : filteredAndSortedNews.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center">Không tìm thấy tin tức nào</TableCell>
                 </TableRow>
               ) : (
-                filteredNews.map((item) => (
+                filteredAndSortedNews.map((item) => (
                   <TableRow key={item._id}>
                     <TableCell>{item.title}</TableCell>
                     <TableCell>

@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { getAllAccountsAPI, deleteAccountAPI} from '../../API';
+import { getAllAccountsAPI, deleteAccountAPI } from '../../API';
 import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
@@ -74,6 +74,19 @@ const ErrorMessage = styled.div`
   border-radius: 4px;
 `;
 
+const SearchControls = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+`;
+
+const FilterSelect = styled.select`
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+`;
+
 interface EditFormData {
     fullName: string;
     email: string;
@@ -106,8 +119,10 @@ interface Props {
 }
 
 const EditAccount: React.FC<Props> = ({ onEdit }) => {
-    const navigate = useNavigate();
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const [searchType, setSearchType] = useState('fullName');
+    const [sortBy, setSortBy] = useState<'name' | 'date'>('date');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -122,10 +137,6 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
     });
 
     useEffect(() => {
-        fetchAccounts();
-    }, []);
-
-    useEffect(() => {
         if (selectedAccount) {
             setFormData({
                 fullName: selectedAccount.fullName,
@@ -136,6 +147,8 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
                 status: selectedAccount.status
             });
         }
+
+        fetchAccounts();
     }, [selectedAccount]);
 
     const fetchAccounts = async () => {
@@ -157,6 +170,36 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
 
     const handleEdit = (account: Account) => {
         onEdit(account);
+    };
+
+    const getFilteredAndSortedAccounts = () => {
+        return accounts
+            .filter(account => {
+                const searchLower = searchTerm.toLowerCase();
+                switch (searchType) {
+                    case 'fullName':
+                        return account.fullName.toLowerCase().includes(searchLower);
+                    case 'email':
+                        return account.email.toLowerCase().includes(searchLower);
+                    case 'role':
+                        return account.roles.some(role =>
+                            role.name.toLowerCase().includes(searchLower)
+                        );
+                    default:
+                        return true;
+                }
+            })
+            .sort((a, b) => {
+                if (sortBy === 'name') {
+                    return sortOrder === 'asc'
+                        ? a.fullName.localeCompare(b.fullName)
+                        : b.fullName.localeCompare(a.fullName);
+                } else {
+                    return sortOrder === 'asc'
+                        ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                }
+            });
     };
 
     const handleDelete = async (accountId: string) => {
@@ -181,12 +224,38 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
         <Container>
             <Header>
                 <Title>Quản lý tài khoản</Title>
-                <SearchInput
-                    type="text"
-                    placeholder="Tìm kiếm tài khoản..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <SearchControls>
+                    <FilterSelect
+                        value={searchType}
+                        onChange={(e) => setSearchType(e.target.value)}
+                    >
+                        <option value="fullName">Tìm theo tên</option>
+                        <option value="email">Tìm theo email</option>
+                        <option value="role">Tìm theo vai trò</option>
+                    </FilterSelect>
+                    <SearchInput
+                        type="text"
+                        placeholder={`Tìm kiếm theo ${searchType === 'fullName' ? 'tên' :
+                                searchType === 'email' ? 'email' : 'vai trò'
+                            }...`}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <FilterSelect
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as 'name' | 'date')}
+                    >
+                        <option value="date">Sắp xếp theo ngày</option>
+                        <option value="name">Sắp xếp theo tên</option>
+                    </FilterSelect>
+                    <FilterSelect
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                    >
+                        <option value="desc">Giảm dần</option>
+                        <option value="asc">Tăng dần</option>
+                    </FilterSelect>
+                </SearchControls>
             </Header>
 
             {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -209,12 +278,12 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
                                 <TableRow>
                                     <TableCell colSpan={6} align="center">Đang tải...</TableCell>
                                 </TableRow>
-                            ) : filteredAccounts.length === 0 ? (
+                            ) : getFilteredAndSortedAccounts().length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} align="center">Không tìm thấy tài khoản nào</TableCell>
                                 </TableRow>
                             ) : (
-                                filteredAccounts.map((account) => (
+                                getFilteredAndSortedAccounts().map((account) => (
                                     <TableRow key={account._id}>
                                         <TableCell>{account.fullName}</TableCell>
                                         <TableCell>{account.email}</TableCell>
