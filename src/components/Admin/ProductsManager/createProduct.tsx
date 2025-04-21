@@ -6,13 +6,15 @@ import {
   Typography,
   TextField,
   Button,
-  Box
+  Box,
+  FormControl, 
+  InputLabel
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { createProductAPI, updateProductAPI } from '../../API';
+import { createProductAPI, getAllCategoriesAPI, updateProductAPI } from '../../API';
 import { getCommentsByProductIdAPI, deleteCommentAPI } from '../../API';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton } from '@mui/material';
+import { Select, MenuItem } from '@mui/material';
 
 const PageContainer = styled(Container)`
   padding: 40px 0;
@@ -22,6 +24,20 @@ const Title = styled(Typography)`
   margin-bottom: 40px !important;
   color: #e31837;
   font-weight: bold !important;
+`;
+
+const StyledSelect = styled(Select)`
+  .MuiOutlinedInput-notchedOutline {
+    border-radius: 8px;
+  }
+  
+  &:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #e31837;
+  }
+  
+  &.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #e31837;
+  }
 `;
 
 const FormContainer = styled(Box)`
@@ -94,6 +110,11 @@ interface Comment {
   createdAt: string;
 }
 
+interface Role {
+  _id: string;
+  name: string;
+}
+
 const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
   const [formData, setFormData] = useState<EditFormData>({
     name: '',
@@ -105,6 +126,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
   const [image, setImage] = useState<File | null>(null);
   const showToast = useToast();
   const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Role[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
 
   // Add new useEffect to fetch comments when editing
@@ -131,6 +153,17 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
       }
     };
     fetchComments();
+
+    const fetchCategories = async () => {
+      try {
+        const rolesData = await getAllCategoriesAPI();
+        setCategories(rolesData);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        showToast('Không thể tải danh mục', 'error');
+      }
+    };
+    fetchCategories();
   }, [editingProduct]);
 
   // Add function to handle comment deletion
@@ -187,7 +220,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
 
       await createProductAPI(newProduct);
       showToast('Thêm sản phẩm thành công!', 'success');
-      
+
       setImage(null);
       setCurrentImage(null);
       onSuccess();
@@ -256,14 +289,36 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
             </Box>
 
             <Box>
-              <StyledTextField
-                fullWidth
-                label="Danh mục"
-                value={formData.category_id.name}
-                onChange={handleFormChange}
-                name="category_id.name"
-                required
-              />
+              <FormControl fullWidth>
+                <InputLabel id="category-label">Danh mục</InputLabel>
+                <StyledSelect
+                  labelId="category-label"
+                  value={formData.category_id._id}
+                  onChange={(e) => {
+                    const selectedCategory = categories.find(cat => cat._id === e.target.value);
+                    if (selectedCategory) {
+                      setFormData(prev => ({
+                        ...prev,
+                        category_id: {
+                          _id: selectedCategory._id,
+                          name: selectedCategory.name
+                        }
+                      }));
+                    }
+                  }}
+                  label="Danh mục"
+                  required
+                >
+                  <MenuItem value="" disabled>
+                    Chọn danh mục
+                  </MenuItem>
+                  {categories.map((category) => (
+                    <MenuItem key={category._id} value={category._id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </StyledSelect>
+              </FormControl>
             </Box>
 
             <Box>

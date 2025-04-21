@@ -404,4 +404,132 @@ export const deleteOrderDetailAPI = async (detailId) => {
   }
 };
 
+// Role APIs
+export const getAllRolesAPI = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/api/roles`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    throw error;
+  }
+};
+
+export const getRoleByIdAPI = async (roleId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/roles/${roleId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching role:', error);
+    throw error;
+  }
+};
+
+export const createRoleAPI = async (roleData) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/roles/create`, roleData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating role:', error);
+    throw error;
+  }
+};
+
+export const updateRoleAPI = async (roleId, roleData) => {
+  try {
+    const response = await axios.put(`${API_URL}/api/roles/${roleId}`, roleData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating role:', error);
+    throw error;
+  }
+};
+
+export const deleteRoleAPI = async (roleId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/roles/${roleId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting role:', error);
+    throw error;
+  }
+};
+
+export const assignRoleToAccountAPI = async (accountId, roleId) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/roles/assign`, {
+      accountId,
+      roleId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error assigning role:', error);
+    throw error;
+  }
+};
+
+export const removeRoleFromAccountAPI = async (accountId, roleId) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/roles/remove`, {
+      accountId,
+      roleId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error removing role:', error);
+    throw error;
+  }
+};
+
+// Category APIs
+export const getAllCategoriesAPI = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/api/categories`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    throw error;
+  }
+};
+
+export const getCategoryByIdAPI = async (categoryId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/categories/${categoryId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching category:', error);
+    throw error;
+  }
+};
+
+export const createCategoryAPI = async (categoryData) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/categories/create`, categoryData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating category:', error);
+    throw error;
+  }
+};
+
+export const updateCategoryAPI = async (categoryId, categoryData) => {
+  try {
+    const response = await axios.put(`${API_URL}/api/categories/${categoryId}`, categoryData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+};
+
+export const deleteCategoryAPI = async (categoryId) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/categories/${categoryId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    throw error;
+  }
+};
+
 
