@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from '../../Styles/ToastProvider';
 import styled from 'styled-components';
 import {
     IconButton,
@@ -13,7 +14,6 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getAllAccountsAPI, deleteAccountAPI } from '../../API';
-import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   padding: 20px;
@@ -63,15 +63,6 @@ const StyledTableContainer = styled(TableContainer)`
 
 const StyledPaper = styled(Paper)`
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-`;
-
-const ErrorMessage = styled.div`
-  color: #dc3545;
-  font-size: 14px;
-  margin: 8px 0;
-  padding: 8px;
-  background-color: #ffebee;
-  border-radius: 4px;
 `;
 
 const SearchControls = styled.div`
@@ -126,7 +117,7 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const showToast = useToast();
     const [formData, setFormData] = useState<EditFormData>({
         fullName: '',
         email: '',
@@ -158,10 +149,10 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
             if (Array.isArray(response)) {
                 setAccounts(response);
             } else {
-                setError('Dữ liệu không hợp lệ');
+                showToast('Dữ liệu không hợp lệ!', 'error');
             }
         } catch (err) {
-            setError('Không thể tải danh sách tài khoản');
+            showToast('Không thể tải danh sách sản phẩm!', 'error');
             console.error('Error fetching accounts:', err);
         } finally {
             setIsLoading(false);
@@ -207,18 +198,13 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
             try {
                 await deleteAccountAPI(accountId);
                 setAccounts(accounts.filter(a => a._id !== accountId));
-                alert('Xóa tài khoản thành công!');
+                showToast('Xóa tài khoản thành công!', 'success');
             } catch (err) {
-                setError('Không thể xóa tài khoản');
+                showToast('Không thể xóa tài khoản!', 'error');
                 console.error('Error deleting account:', err);
             }
         }
     };
-
-    const filteredAccounts = accounts.filter(account =>
-        account.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        account.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     return (
         <Container>
@@ -257,8 +243,6 @@ const EditAccount: React.FC<Props> = ({ onEdit }) => {
                     </FilterSelect>
                 </SearchControls>
             </Header>
-
-            {error && <ErrorMessage>{error}</ErrorMessage>}
 
             <StyledTableContainer>
                 <StyledPaper>

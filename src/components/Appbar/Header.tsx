@@ -91,7 +91,8 @@ border: 2px solid #e31837;
 `;
 
 const Logo = styled.img`
-  height: 90px;
+  height: 70px;
+  margin: 10px 0;
   object-fit: contain;
   
   @media (max-width: 768px) {
@@ -113,6 +114,7 @@ const NavContainer = styled.div`
 const NavLinks = styled.nav<{ $isOpen: boolean }>`
   display: flex;
   align-items: center;
+  font-size: 20px;
   gap: 30px;
 
   @media (max-width: 768px) {
@@ -341,6 +343,7 @@ const DropdownItem = styled(NavLink)`
   text-decoration: none;
   display: block;
   transition: all 0.3s ease;
+  font-size: 14px;
   
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);

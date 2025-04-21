@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { registerAPI } from '../../API';
 import VerifyAccountForm from './VerifyAccount';
 import ForgotPasswordForm from './ForgotPassword';
+import { useToast } from '../../Styles/ToastProvider';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {
@@ -140,7 +141,6 @@ interface RegisterFormProps {
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showVerifyForm, setShowVerifyForm] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -151,8 +151,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
     confirmPassword: '',
     image: ''
   });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const showToast = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -160,23 +160,21 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
       ...prev,
       [name]: value
     }));
-    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp');
+      showToast('Mật khẩu xác nhận không khớp!', 'error');
       setLoading(false);
       return;
     }
 
     try {
-      const response = await registerAPI(
+      await registerAPI(
         formData.fullName,
         formData.email,
         formData.password,
@@ -188,7 +186,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
       // Show verification form
       setShowVerifyForm(true);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng ký');
+      showToast('Có lỗi xảy ra khi đăng ký!', 'error');
     } finally {
       setLoading(false);
     }
@@ -255,8 +253,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ open, onClose }) => {
                 required
               />
             </InputField>
-
-            {error && <ErrorMessage>{error}</ErrorMessage>}
 
             <RegisterButton type="submit" $loading={loading}>
               {loading ? 'Đang xử lý...' : 'Đăng ký'}

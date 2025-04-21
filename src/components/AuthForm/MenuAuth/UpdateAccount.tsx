@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { updateAccountAPI, getAccountByIdAPI } from '../../API';
 import { getCurrentUser } from '../../Utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../../Styles/ToastProvider';
 
 const Container = styled.div`
   max-width: 800px;
@@ -100,6 +101,7 @@ const SuccessMessage = styled.p`
 const UpdateAccount = () => {
     const navigate = useNavigate();
     const user = getCurrentUser();
+    const showToast = useToast();
     const [formData, setFormData] = useState(() => ({
         fullName: user?.fullName || '',
         email: user?.email || '',
@@ -107,8 +109,6 @@ const UpdateAccount = () => {
         createdAt: '',
     }));
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
     useEffect(() => {
         const fetchAccountData = async () => {
@@ -128,7 +128,8 @@ const UpdateAccount = () => {
                     }
                 }
             } catch (err) {
-                setError('Không thể tải thông tin tài khoản');
+              showToast('Không thể tải thông tin tài khoản!', 'error');
+              console.error('Lỗi khi tải thông tin tài khoản:', err);
             }
         };
         fetchAccountData();
@@ -145,17 +146,17 @@ const UpdateAccount = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setError('');
-        setSuccess('');
         console.log(formData);
 
         try {
 
             await updateAccountAPI(user.id, formData);
-            setSuccess('Cập nhật thông tin thành công');
+            showToast('Cập nhật tài khoản thành công!', 'success');
+            navigate('/account/profile');
 
         } catch (err: any) {
-            setError(err.message || 'Có lỗi xảy ra khi cập nhật thông tin');
+          showToast('Có lỗi khi cập nhật tài khoản!', 'error');
+          console.error('Lỗi khi cập nhật tài khoản:', err);
         } finally {
             setIsLoading(false);
         }
@@ -198,9 +199,6 @@ const UpdateAccount = () => {
                         onChange={handleChange}
                     />
                 </FormGroup>
-
-                {error && <ErrorMessage>{error}</ErrorMessage>}
-                {success && <SuccessMessage>{success}</SuccessMessage>}
 
                 <ButtonGroup>
                     <CancelButton type="button" onClick={handleCancel}>

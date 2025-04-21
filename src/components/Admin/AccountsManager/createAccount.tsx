@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useToast } from '../../Styles/ToastProvider';
 import {
     TextField,
     Button,
@@ -8,8 +9,7 @@ import {
     Select,
     MenuItem,
     FormControlLabel,
-    Switch,
-    Alert
+    Switch
 } from '@mui/material';
 import { createAccountAPI, getAllAccountsAPI, updateAccountAPI } from '../../API';
 
@@ -88,11 +88,7 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [availableRoles, setAvailableRoles] = useState<{ _id: string; name: string; }[]>([]);
-    const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: '',
-        severity: 'success'
-    });
+    const showToast = useToast();
 
     useEffect(() => {
         const fetchRoles = async () => {
@@ -138,7 +134,7 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
         setError('');
 
         if (!formData.fullName || !formData.email || !formData.roles.length) {
-            setError('Vui lòng điền đầy đủ thông tin');
+            showToast('Vui lòng điền đủ thông tin!', 'error');
             return;
         }
 
@@ -149,14 +145,10 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
                 status: formData.status
             };
             await createAccountAPI(accountData);
-            setSnackbar({
-                open: true,
-                message: 'Thêm tài khoản thành công!',
-                severity: 'success'
-            });
+            showToast('Thêm tài khoản thành công!', 'success');
             onSuccess();
         } catch (err) {
-            setError('Không thể tạo tài khoản. Vui lòng thử lại.');
+            showToast('Không thể tạo tài khoản vui lòng thử lại!', 'error');
             console.error('Error creating account:', err);
         } finally {
             setIsLoading(false);
@@ -168,7 +160,7 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
         setError('');
 
         if (!formData.fullName || !formData.email || !formData.roles) {
-            setError('Vui lòng điền đầy đủ thông tin');
+            showToast('Vui lòng điền đầy đủ thông tin!', 'error');
             return;
         }
 
@@ -181,15 +173,11 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
                     _id: editingAccount._id
                 };
                 await updateAccountAPI(editingAccount._id, accountData);
-                setSnackbar({
-                    open: true,
-                    message: 'Cập nhật tài khoản thành công!',
-                    severity: 'success'
-                });
+                showToast('Cập nhật tài khoản thành công!', 'success');
                 onSuccess();
             }
         } catch (err) {
-            setError('Không thể cập nhật tài khoản. Vui lòng thử lại.');
+            showToast('Không thể cập nhật tài khoản. Vui lòng thử lại!', 'error');
             console.error('Error updating account:', err);
         } finally {
             setIsLoading(false);

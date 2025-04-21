@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useToast } from '../../Styles/ToastProvider';
 import {
     IconButton,
     Table,
@@ -12,8 +13,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { getAllProductsAPI, deleteProductAPI, updateProductAPI } from '../../API';
-import { useNavigate } from 'react-router-dom';
+import { getAllProductsAPI, deleteProductAPI } from '../../API';
 
 const Container = styled.div`
   padding: 20px;
@@ -118,7 +118,7 @@ const EditProduct: React.FC<Props> = ({ onEdit }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const showToast = useToast();
     const [formData, setFormData] = useState<EditFormData>({
         name: '',
         price: '',
@@ -150,10 +150,10 @@ const EditProduct: React.FC<Props> = ({ onEdit }) => {
             if (Array.isArray(response)) {
                 setProducts(response);
             } else {
-                setError('Dữ liệu không hợp lệ');
+                showToast('Dữ liệu không hợp lệ!', 'error');
             }
         } catch (err) {
-            setError('Không thể tải danh sách sản phẩm');
+            showToast('Không thể tải danh sách sản phẩm!', 'error');
             console.error('Error fetching products:', err);
         } finally {
             setIsLoading(false);
@@ -176,16 +176,15 @@ const EditProduct: React.FC<Props> = ({ onEdit }) => {
             try {
                 await deleteProductAPI(productId);
                 setProducts(products.filter(p => p._id !== productId));
-                alert('Xóa sản phẩm thành công!');
+                showToast('Xóa sản phẩm thành công!', 'success');
             } catch (err) {
-                setError('Không thể xóa sản phẩm');
+                showToast('Không thể xóa sản phẩm!', 'error');
                 console.error('Error deleting product:', err);
             }
         }
     };
 
     // Add these new states after existing useState declarations
-    const [searchCategory, setSearchCategory] = useState('all');
     const [priceRange, setPriceRange] = useState({ min: '', max: '' });
     
     // Update the filteredProducts logic
@@ -232,8 +231,6 @@ const EditProduct: React.FC<Props> = ({ onEdit }) => {
                     </div>
                 </div>
             </Header>
-
-            {error && <ErrorMessage>{error}</ErrorMessage>}
 
             <StyledTableContainer>
                 <StyledPaper>

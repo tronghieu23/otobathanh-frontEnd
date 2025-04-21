@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useToast } from '../../Styles/ToastProvider';
 import {
   Container,
   Typography,
   TextField,
   Button,
-  Box,
-  Alert,
+  Box
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { createProductAPI, updateProductAPI } from '../../API';
@@ -95,7 +95,6 @@ interface Comment {
 }
 
 const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState<EditFormData>({
     name: '',
     price: '',
@@ -104,13 +103,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
     description: ''
   });
   const [image, setImage] = useState<File | null>(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const showToast = useToast();
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
 
@@ -145,18 +138,10 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
     try {
       await deleteCommentAPI(commentId);
       setComments(comments.filter(comment => comment._id !== commentId));
-      setSnackbar({
-        open: true,
-        message: 'Xóa bình luận thành công!',
-        severity: 'success'
-      });
+      showToast('Xóa bình luận thành công!', 'success');
     } catch (error) {
       console.error('Error deleting comment:', error);
-      setSnackbar({
-        open: true,
-        message: 'Có lỗi xảy ra khi xóa bình luận',
-        severity: 'error'
-      });
+      showToast('Có lỗi khi xóa bình luận!', 'error');
     }
   };
 
@@ -181,7 +166,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
     e.preventDefault();
 
     if (!formData.name || !formData.price || !formData.quantity || !formData.category_id._id) {
-      setError('Vui lòng điền đầy đủ thông tin');
+      showToast('Vui lòng nhập đầy đủ thông tin!', 'error');
       return;
     }
 
@@ -201,22 +186,14 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
       };
 
       await createProductAPI(newProduct);
-      setSnackbar({
-        open: true,
-        message: 'Thêm sản phẩm thành công!',
-        severity: 'success'
-      });
+      showToast('Thêm sản phẩm thành công!', 'success');
       
       setImage(null);
       setCurrentImage(null);
       onSuccess();
     } catch (error) {
       console.error('Error:', error);
-      setSnackbar({
-        open: true,
-        message: 'Có lỗi xảy ra khi thêm sản phẩm',
-        severity: 'error'
-      });
+      showToast('Có lỗi khi thêm sản phẩm!', 'error');
     }
   };
 
@@ -224,7 +201,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
     e.preventDefault();
 
     if (!formData.name || !formData.price || !formData.quantity || !formData.category_id._id) {
-      setError('Vui lòng điền đầy đủ thông tin');
+      showToast('Vui lòng điền đầy đủ thông tin!', 'error');
       return;
     }
 
@@ -245,20 +222,12 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
 
       if (editingProduct) {
         await updateProductAPI(editingProduct._id, updatedProduct);
-        setSnackbar({
-          open: true,
-          message: 'Cập nhật sản phẩm thành công!',
-          severity: 'success'
-        });
+        showToast('Cập nhật sản phẩm thành công!', 'success');
       }
       onSuccess();
     } catch (error) {
       console.error('Error:', error);
-      setSnackbar({
-        open: true,
-        message: 'Có lỗi xảy ra khi cập nhật sản phẩm',
-        severity: 'error'
-      });
+      showToast('Có lỗi khi cập nhật sản phẩm!', 'error');
     }
   };
 
@@ -283,8 +252,6 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
                 onChange={handleFormChange}
                 name="name"
                 required
-                error={!formData.name && error !== ''}
-                helperText={!formData.name && error !== '' ? 'Tên sản phẩm là bắt buộc' : ''}
               />
             </Box>
 
@@ -296,8 +263,6 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
                 onChange={handleFormChange}
                 name="category_id.name"
                 required
-                error={!formData.category_id.name && error !== ''}
-                helperText={!formData.category_id.name && error !== '' ? 'Danh mục là bắt buộc' : ''}
               />
             </Box>
 
@@ -310,8 +275,6 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
                 onChange={handleFormChange}
                 name="price"
                 required
-                error={!formData.price && error !== ''}
-                helperText={!formData.price && error !== '' ? 'Giá là bắt buộc' : ''}
               />
             </Box>
 
@@ -324,8 +287,6 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
                 onChange={handleFormChange}
                 name="quantity"
                 required
-                error={!formData.quantity && error !== ''}
-                helperText={!formData.quantity && error !== '' ? 'Số lượng là bắt buộc' : ''}
               />
             </Box>
 
@@ -339,8 +300,6 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
                 multiline
                 rows={4}
                 required
-                error={!formData.description && error !== ''}
-                helperText={!formData.description && error !== '' ? 'Mô tả là bắt buộc' : ''}
               />
             </Box>
 
@@ -384,18 +343,6 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
               )}
             </Box>
           </Box>
-
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              {success}
-            </Alert>
-          )}
 
           <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
             <Button

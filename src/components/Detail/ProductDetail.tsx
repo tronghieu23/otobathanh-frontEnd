@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getProductByIdAPI, addToCartAPI, getAllProductsAPI, createCommentAPI, getCommentsByProductIdAPI, getCartItemsAPI } from '../API';
 import { getCurrentUser } from '../Utils/auth';
+import { useToast } from '../Styles/ToastProvider';
 
 // Styled Components for layout and design
 const ProductContainer = styled.div`
@@ -222,18 +223,18 @@ const ProductPage = () => {
 
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const user = getCurrentUser();
+  const showToast = useToast();
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (!user?.id) {
-        alert('Vui lòng đăng nhập để bình luận!');
+        showToast('Vui lòng đăng nhập để thêm bình luận!', 'error');
         return;
       }
 
@@ -249,12 +250,12 @@ const ProductPage = () => {
           const updatedComments = await getCommentsByProductIdAPI(id);
           setComments(updatedComments);
           setNewComment('');
-          alert('Bình luận đã được thêm thành công!');
+          showToast('Bình luận được thêm thành công!', 'success');
         }
       }
     } catch (error: any) {
       console.error('Error posting comment:', error);
-      alert(error.response?.data?.message || 'Không thể gửi bình luận. Vui lòng thử lại sau.');
+      showToast('Không thể thêm bình luận. Vui lòng thử lại sau!', 'error');
     }
   };
 
@@ -311,7 +312,7 @@ const ProductPage = () => {
 
     try {
       if (product.quantity < 1) {
-        alert('Sản phẩm đã hết hàng!');
+        showToast('Sản phẩm đã hết hàng!', 'info');
         return;
       }
 
@@ -322,7 +323,7 @@ const ProductPage = () => {
 
       // Check if adding one more would exceed available quantity
       if (currentCartQuantity + 1 > product.quantity) {
-        alert(`Không thể thêm vào giỏ hàng. Chỉ còn ${product.quantity} sản phẩm trong kho!`);
+        showToast(`Không thể thêm vào giỏ hàng. Chỉ còn ${product.quantity} sản phẩm trong kho!`, 'info');
         return;
       }
 
@@ -335,7 +336,7 @@ const ProductPage = () => {
       await addToCartAPI(cartData);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      alert('Không thể thêm vào giỏ hàng');
+      showToast('Không thể thêm vào của hàng!', 'error');
     }
   };
 

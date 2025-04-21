@@ -6,6 +6,7 @@ import { getCartItemsAPI, updateCartItemAPI, removeFromCartAPI } from '../API';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useToast } from '../Styles/ToastProvider';
 
 const CartContainer = styled.div`
   max-width: 1200px;
@@ -115,15 +116,6 @@ const TotalPrice = styled.div`
   font-weight: 500;
 `;
 
-interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  quantity: number; // Add this
-  image: string;
-  description: string;
-}
-
 interface CartItem {
   _id: string;
   quantity: number;
@@ -140,6 +132,7 @@ const CartDetail = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const navigate = useNavigate();
   const user = getCurrentUser();
+  const showToast = useToast();
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -165,7 +158,7 @@ const CartDetail = () => {
       if (!item) return;
 
       if (newQuantity > item.product_id.quantity) {
-        alert(`Không thể thêm vào giỏ hàng. Chỉ còn ${item.product_id.quantity} sản phẩm trong kho!`);
+        showToast(`Không thể thêm vào giỏ hàng. Chỉ còn ${item.product_id.quantity} sản phẩm trong kho!`, 'info');
         return;
       }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
+import { useToast } from '../../Styles/ToastProvider';
 import { Typography, CardContent, CardMedia, Button, Paper } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { SectionTitle } from '../../Styles/StylesComponents';
@@ -187,6 +188,7 @@ const Products = () => {
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const navigate = useNavigate();
   const user = getCurrentUser();
+  const showToast = useToast();
   const productRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [visibleMap, setVisibleMap] = useState<Record<string, boolean>>({});
 
@@ -259,7 +261,7 @@ const Products = () => {
 
     try {
       if (product.quantity < 1) {
-        alert('Sản phẩm đã hết hàng!');
+        showToast('Sản phẩm hết hàng!', 'info');
         return;
       }
 
@@ -270,7 +272,7 @@ const Products = () => {
 
       // Check if adding one more would exceed available quantity
       if (currentCartQuantity + 1 > product.quantity) {
-        alert(`Không thể thêm vào giỏ hàng. Chỉ còn ${product.quantity} sản phẩm trong kho!`);
+        showToast(`Không thể thêm vào giỏ hàng. Chỉ còn ${product.quantity} sản phẩm trong kho!`, 'info');
         return;
       }
 
@@ -283,7 +285,7 @@ const Products = () => {
       await addToCartAPI(cartData);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      alert('Không thể thêm vào giỏ hàng');
+      showToast('Không thể thêm vào giỏ hàng!', 'error');
     }
   };
 
