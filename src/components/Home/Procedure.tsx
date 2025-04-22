@@ -1,5 +1,6 @@
 import React from 'react';
 import '../Css/Procedure.css';
+import { useState, useEffect } from 'react';
 
 interface Step {
   title: string;
@@ -39,7 +40,27 @@ const steps: Step[] = [
   },
 ];
 
+const images = [
+  '/image/procedure.jpg',
+  '/image/procedure1.jpg',
+  '/image/procedure2.jpg',
+  '/image/procedure3.jpg',
+  '/image/procedure4.jpg',
+];
+
 const WorkProcess: React.FC = () => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 3000); // Change image every 3 seconds
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="work-process-container">
       <h2 className="work-process-title">QUY TRÌNH LÀM VIỆC CỦA CHÚNG TÔI</h2>
@@ -49,7 +70,11 @@ const WorkProcess: React.FC = () => {
       
       <div className="work-process-wrapper">
         <div className="car-center">
-          <img src="/image/procedure.jpg" alt="Car" />
+          <img 
+            src={images[currentImageIndex]} 
+            alt={`Car ${currentImageIndex + 1}`} 
+            style={{ transition: 'opacity 0.5s ease-in-out' }}
+          />
         </div>
 
         {steps.map((step, index) => (

@@ -9,7 +9,10 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../Styles/ToastProvider';
-import { getAllProductsAPI, addToCartAPI, getCartItemsAPI, getAllCategoriesAPI } from '../../API';
+import {
+  getAllProductsAPI, addToCartAPI, getAllCategoriesAPI,
+  likeProductAPI, unlikeProductAPI, countProductLikesAPI, isProductLikedAPI
+} from '../../API';
 import { getCurrentUser } from '../../Utils/auth';
 import { SelectChangeEvent } from '@mui/material/Select';
 
@@ -139,11 +142,14 @@ const LikeButton = styled(Button)`
   padding: 0 !important;
   border-radius: 50% !important;
   background-color: white !important;
-  color: #e31837 !important;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
   
   &:hover {
-    background-color: #f5f5f5 !important;
+    background-color: '#f5f5f5'}
+  }
+
+  svg {
+    color: '#666'}
   }
 `;
 
@@ -179,9 +185,10 @@ interface Product {
   _id: string;
   name: string;
   price: number;
-  quantity: number; // Add this
+  quantity: number;
   image: string;
   description: string;
+  likes?: number; // Add this
 }
 
 interface Category {
@@ -192,7 +199,7 @@ interface Category {
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [likedProducts, setLikedProducts] = useState<string[]>([]);
+  const [productLikes, setProductLikes] = useState<Record<string, number>>({});
   const [sortOption, setSortOption] = useState('default');
   const [priceFilters, setPriceFilters] = useState({
     under500: false,
@@ -200,11 +207,11 @@ const Products = () => {
     '1000to2000': false,
     above2000: false,
   });
+  const [likedStatus, setLikedStatus] = useState<Record<string, boolean>>({});
 
   const navigate = useNavigate();
   const user = getCurrentUser();
   const showToast = useToast();
-  // Update the ref type at the top of the file
   const productRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const handleSortChange = (event: SelectChangeEvent<string>) => {
@@ -227,31 +234,120 @@ const Products = () => {
     try {
       const data = await getAllCategoriesAPI();
       setCategories(data);
-      console.log(data); // Add this line to see the fetched categories i
     } catch (error) {
       console.error('Failed to fetch categories:', error);
       showToast('Không thể tải danh mục sản phẩm', 'error');
     }
   };
 
+  // Separate useEffect for initial data loading
   useEffect(() => {
     fetchProducts();
     fetchCategories();
   }, []);
+
+  // Separate useEffect for like data
+  useEffect(() => {
+    if (user && products.length > 0) {
+      fetchLikeData();
+    }
+  }, [user, products]);
 
   // Add missing handleViewDetail function
   const handleViewDetail = (productId: string) => {
     navigate(`/products/${productId}`);
   };
 
-  // Add missing handleLike function
+  const fetchLikeData = async () => {
+    if (!user) return;
+
+    try {
+      // Get like counts for all products
+      const likeCounts = await Promise.all(
+        products.map(async (product) => {
+          try {
+            const count = await countProductLikesAPI(product._id);
+            const isLiked = await isProductLikedAPI(user.id, product._id);
+            return {
+              id: product._id,
+              count: Number(count),
+              isLiked
+            };
+          } catch (error) {
+            console.error(`Failed to get likes for product ${product._id}:`, error);
+            return { id: product._id, count: 0, isLiked: false };
+          }
+        })
+      );
+
+      const likesMap = likeCounts.reduce((acc, curr) => ({
+        ...acc,
+        [curr.id]: curr.count
+      }), {});
+
+      const likedStatusMap = likeCounts.reduce((acc, curr) => ({
+        ...acc,
+        [curr.id]: curr.isLiked
+      }), {});
+
+      setProductLikes(likesMap);
+      setLikedStatus(likedStatusMap);
+    } catch (error) {
+      console.error('Failed to fetch like data:', error);
+      showToast('Không thể tải dữ liệu yêu thích', 'error');
+    }
+  };
+
+
+
   const handleLike = async (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
-    setLikedProducts(prev =>
-      prev.includes(productId)
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    );
+
+    if (!user) {
+      showToast('Đăng nhập để thích sản phẩm', 'warning');
+      return;
+    }
+
+    try {
+      const isCurrentlyLiked = likedStatus[productId];
+
+      if (isCurrentlyLiked) {
+        // Unlike
+        await unlikeProductAPI({
+          accountId: user.id,
+          productId: productId
+        });
+
+        setLikedStatus(prev => ({
+          ...prev,
+          [productId]: false
+        }));
+        setProductLikes(prev => ({
+          ...prev,
+          [productId]: Math.max((prev[productId] || 1) - 1, 0)
+        }));
+        showToast('Bạn đã xóa thích sản phẩm', 'success');
+      } else {
+        // Like
+        await likeProductAPI({
+          accountId: user.id,
+          productId: productId
+        });
+
+        setLikedStatus(prev => ({
+          ...prev,
+          [productId]: true
+        }));
+        setProductLikes(prev => ({
+          ...prev,
+          [productId]: (prev[productId] || 0) + 1
+        }));
+        showToast('Bạn đã thích sản phẩm', 'success');
+      }
+    } catch (error) {
+      console.error('Failed to update like:', error);
+      showToast('Lỗi khi thích sản phẩm', 'error');
+    }
   };
 
   // Add missing handleAddToCart function
@@ -270,7 +366,7 @@ const Products = () => {
 
     try {
       await addToCartAPI({
-        user_id: user.id,
+        account_id: user.id,
         product_id: product._id,
         quantity: 1
       });
@@ -280,11 +376,6 @@ const Products = () => {
       showToast('Không thể thêm vào giỏ hàng', 'error');
     }
   };
-
-  // Add intersection observer for animation
-  useEffect(() => {
-    fetchProducts();
-  }, []);
 
   // Helper function for price filter labels
   const getPriceFilterLabel = (key: string) => {
@@ -465,9 +556,16 @@ const Products = () => {
                   <ButtonGroup>
                     <LikeButton
                       onClick={(e) => handleLike(e, product._id)}
+                      title={`${productLikes[product._id] || 0} likes`}
+                      sx={{
+                        color: likedStatus[product._id] ? '#e31837' : '#666',
+                        '&:hover': {
+                          backgroundColor: likedStatus[product._id] ? '#fff5f5' : '#f5f5f5'
+                        }
+                      }}
                     >
-                      {likedProducts.includes(product._id)
-                        ? <FavoriteIcon />
+                      {likedStatus[product._id]
+                        ? <FavoriteIcon sx={{ color: '#e31837' }} />
                         : <FavoriteBorderIcon />
                       }
                     </LikeButton>

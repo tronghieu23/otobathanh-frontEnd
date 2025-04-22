@@ -5,6 +5,7 @@ import { Typography, CardContent, CardMedia, Button, Paper } from '@mui/material
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { SectionTitle } from '../Styles/StylesComponents';
 import { getAllProductsAPI, addToCartAPI, getCartItemsAPI } from '../API';
+import { likeProductAPI, unlikeProductAPI, countProductLikesAPI, isProductLikedAPI } from '../API';
 import { useNavigate } from 'react-router-dom';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -165,7 +166,7 @@ interface Product {
   _id: string;
   name: string;
   price: number;
-  quantity: number; // Add this
+  quantity: number;
   image: string;
   description: string;
 }
@@ -184,7 +185,8 @@ interface CartItem {
 const Products = () => {
   // Update useState type
   const [products, setProducts] = useState<Product[]>([]);
-  const [likedProducts, setLikedProducts] = useState<string[]>([]);
+  const [productLikes, setProductLikes] = useState<Record<string, number>>({});
+  const [likedStatus, setLikedStatus] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const user = getCurrentUser();
   const showToast = useToast();
@@ -228,6 +230,12 @@ const Products = () => {
     return () => observer.disconnect();
   }, [products, visibleMap]);
 
+  useEffect(() => {
+    if (user && products.length > 0) {
+      fetchLikeData();
+    }
+  }, [user, products]);
+
   const fetchProducts = async () => {
     try {
       const data = await getAllProductsAPI();
@@ -237,13 +245,96 @@ const Products = () => {
     }
   };
 
-  const handleLike = (e: React.MouseEvent, productId: string) => {
+  const fetchLikeData = async () => {
+    if (!user) return;
+
+    try {
+      // Get like counts for all products
+      const likeCounts = await Promise.all(
+        products.map(async (product) => {
+          try {
+            const count = await countProductLikesAPI(product._id);
+            const isLiked = await isProductLikedAPI(user.id, product._id);
+            return {
+              id: product._id,
+              count: Number(count),
+              isLiked
+            };
+          } catch (error) {
+            console.error(`Failed to get likes for product ${product._id}:`, error);
+            return { id: product._id, count: 0, isLiked: false };
+          }
+        })
+      );
+
+      const likesMap = likeCounts.reduce((acc, curr) => ({
+        ...acc,
+        [curr.id]: curr.count
+      }), {});
+
+      const likedStatusMap = likeCounts.reduce((acc, curr) => ({
+        ...acc,
+        [curr.id]: curr.isLiked
+      }), {});
+
+      setProductLikes(likesMap);
+      setLikedStatus(likedStatusMap);
+    } catch (error) {
+      console.error('Failed to fetch like data:', error);
+      showToast('Không thể tải dữ liệu yêu thích', 'error');
+    }
+  };
+
+
+
+  const handleLike = async (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
-    setLikedProducts(prev =>
-      prev.includes(productId)
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    );
+
+    if (!user) {
+      showToast('Đăng nhập để thích sản phẩm', 'warning');
+      return;
+    }
+
+    try {
+      const isCurrentlyLiked = likedStatus[productId];
+
+      if (isCurrentlyLiked) {
+        // Unlike
+        await unlikeProductAPI({
+          accountId: user.id,
+          productId: productId
+        });
+
+        setLikedStatus(prev => ({
+          ...prev,
+          [productId]: false
+        }));
+        setProductLikes(prev => ({
+          ...prev,
+          [productId]: Math.max((prev[productId] || 1) - 1, 0)
+        }));
+        showToast('Bạn đã xóa thích sản phẩm', 'success');
+      } else {
+        // Like
+        await likeProductAPI({
+          accountId: user.id,
+          productId: productId
+        });
+
+        setLikedStatus(prev => ({
+          ...prev,
+          [productId]: true
+        }));
+        setProductLikes(prev => ({
+          ...prev,
+          [productId]: (prev[productId] || 0) + 1
+        }));
+        showToast('Bạn đã thích sản phẩm', 'success');
+      }
+    } catch (error) {
+      console.error('Failed to update like:', error);
+      showToast('Lỗi khi thích sản phẩm', 'error');
+    }
   };
 
   const handleViewDetail = (productId: string) => {
@@ -282,6 +373,7 @@ const Products = () => {
       };
 
       await addToCartAPI(cartData);
+      showToast('Thêm vào giỏ hàng thành công', 'success');
     } catch (error) {
       console.error('Failed to add to cart:', error);
       showToast('Không thể thêm vào giỏ hàng!', 'error');
@@ -324,9 +416,16 @@ const Products = () => {
                 <ButtonGroup>
                   <LikeButton
                     onClick={(e) => handleLike(e, product._id)}
+                    title={`${productLikes[product._id] || 0} likes`}
+                    sx={{
+                      color: likedStatus[product._id] ? '#e31837' : '#666',
+                      '&:hover': {
+                        backgroundColor: likedStatus[product._id] ? '#fff5f5' : '#f5f5f5'
+                      }
+                    }}
                   >
-                    {likedProducts.includes(product._id)
-                      ? <FavoriteIcon />
+                    {likedStatus[product._id]
+                      ? <FavoriteIcon sx={{ color: '#e31837' }} />
                       : <FavoriteBorderIcon />
                     }
                   </LikeButton>

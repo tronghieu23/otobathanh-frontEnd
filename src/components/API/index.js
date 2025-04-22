@@ -250,7 +250,7 @@ export const createCommentAPI = async (commentData) => {
 
 export const getCommentsByProductIdAPI = async (productId) => {
   try {
-    const response = await axios.get(`${API_URL}/api/comments/${productId}`);
+    const response = await axios.get(`${API_URL}/api/comments/product/${productId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching comments:', error);
@@ -528,6 +528,60 @@ export const deleteCategoryAPI = async (categoryId) => {
     return response.data;
   } catch (error) {
     console.error('Error deleting category:', error);
+    throw error;
+  }
+};
+
+// Favorite APIs
+export const likeProductAPI = async ({accountId, productId}) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/favorites/like`, {
+      accountId,
+      productId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error liking product:', error);
+    throw error;
+  }
+};
+
+export const unlikeProductAPI = async ({accountId, productId}) => {
+  try {
+    const response = await axios.delete(`${API_URL}/api/favorites/unlike/${accountId}/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error unliking product:', error);
+    throw error;
+  }
+};
+
+export const getFavoriteProductsAPI = async (accountId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/favorites/account/${accountId}/products`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching favorite products:', error);
+    throw error;
+  }
+};
+
+export const countProductLikesAPI = async (productId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/favorites/product/${productId}/likes/count`);
+    return response.data;
+  } catch (error) {
+    console.error('Error counting product likes:', error);
+    throw error;
+  }
+};
+
+export const isProductLikedAPI = async (accountId, productId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/favorites/account/${accountId}/product/${productId}/liked`);
+    return response.data;
+  } catch (error) {
+    console.error('Error checking if product is liked:', error);
     throw error;
   }
 };
