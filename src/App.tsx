@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router-dom';
 import Header from './components/Appbar/Header';
 import Banner from './components/Home/Banner';
 import News from './components/Home/News';
-import Products from './components/Appbar/Menu/Products';
 import Information from './components/Home/Infor';
 import Footer from './components/Home/Footer';
 import ChatBox from './components/Chatbox/ChatBox';
@@ -29,6 +28,9 @@ import Order from './components/Home/Order';
 import OrderDetail from './components/Detail/OrderDetail';
 import Procedure from './components/Home/Procedure';
 import { ToastProvider } from './components/Styles/ToastProvider';
+import ProductOutstand from './components/Home/ProductOutstand';
+import Products from './components/Appbar/Menu/Products';
+import Partner from './components/Home/Partner';
 
 const MainContent = styled.main`
   margin-top: 80px;
@@ -46,13 +48,15 @@ const App = () => {
               <>
                 <Banner />
                 <HomeServices />
-                <Products />
+                <ProductOutstand />
                 <News />
                 <Information />
                 <Procedure />
                 <HomeStats />
+                <Partner />
               </>
             } />
+            <Route path="/productoutstand" element={<ProductOutstand />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products/:id" element={<ProductPage />} />
             <Route path="/services" element={<Services />} />
@@ -71,6 +75,7 @@ const App = () => {
             <Route path="/order/checkout" element={<Order />} />
             <Route path="/order/orderDetail/:orderId" element={<OrderDetail />} />
             <Route path="/procedure" element={<Procedure />} />
+            <Route path="/partner" element={<Partner />} />
           </Routes>
           <Footer />
         </MainContent>
