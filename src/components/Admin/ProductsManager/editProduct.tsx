@@ -72,15 +72,6 @@ const ImageCell = styled.img`
   border-radius: 4px;
 `;
 
-const ErrorMessage = styled.div`
-  color: #dc3545;
-  font-size: 14px;
-  margin: 8px 0;
-  padding: 8px;
-  background-color: #ffebee;
-  border-radius: 4px;
-`;
-
 interface EditFormData {
     name: string;
     price: string;
