@@ -110,7 +110,7 @@ interface Comment {
   createdAt: string;
 }
 
-interface Role {
+interface Category {
   _id: string;
   name: string;
 }
@@ -126,7 +126,7 @@ const CreateProduct: React.FC<Props> = ({ onSuccess, editingProduct }) => {
   const [image, setImage] = useState<File | null>(null);
   const showToast = useToast();
   const [currentImage, setCurrentImage] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Role[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
 
   // Add new useEffect to fetch comments when editing
