@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useToast } from '../../Styles/ToastProvider';
 import {
     TextField,
     Button,
@@ -8,10 +9,9 @@ import {
     Select,
     MenuItem,
     FormControlLabel,
-    Switch,
-    Alert
+    Switch
 } from '@mui/material';
-import { createAccountAPI, getAllAccountsAPI, updateAccountAPI } from '../../API';
+import { getAllAccountsAPI, updateAccountAPI } from '../../API';
 
 const Container = styled.div`
   padding: 20px;
@@ -33,15 +33,6 @@ const StyledForm = styled.form`
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-`;
-
-const ErrorMessage = styled.div`
-  color: #dc3545;
-  font-size: 14px;
-  margin: 8px 0;
-  padding: 8px;
-  background-color: #ffebee;
-  border-radius: 4px;
 `;
 
 const StyledButton = styled(Button)`
@@ -86,13 +77,8 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
         status: editingAccount?.status ?? true
     });
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
     const [availableRoles, setAvailableRoles] = useState<{ _id: string; name: string; }[]>([]);
-    const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: '',
-        severity: 'success'
-    });
+    const showToast = useToast();
 
     useEffect(() => {
         const fetchRoles = async () => {
@@ -133,42 +119,11 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-
-        if (!formData.fullName || !formData.email || !formData.roles.length) {
-            setError('Vui lòng điền đầy đủ thông tin');
-            return;
-        }
-
-        try {
-            setIsLoading(true);
-            const accountData = {
-                ...formData,
-                status: formData.status
-            };
-            await createAccountAPI(accountData);
-            setSnackbar({
-                open: true,
-                message: 'Thêm tài khoản thành công!',
-                severity: 'success'
-            });
-            onSuccess();
-        } catch (err) {
-            setError('Không thể tạo tài khoản. Vui lòng thử lại.');
-            console.error('Error creating account:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
 
         if (!formData.fullName || !formData.email || !formData.roles) {
-            setError('Vui lòng điền đầy đủ thông tin');
+            showToast('Vui lòng điền đầy đủ thông tin!', 'error');
             return;
         }
 
@@ -181,15 +136,11 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
                     _id: editingAccount._id
                 };
                 await updateAccountAPI(editingAccount._id, accountData);
-                setSnackbar({
-                    open: true,
-                    message: 'Cập nhật tài khoản thành công!',
-                    severity: 'success'
-                });
+                showToast('Cập nhật tài khoản thành công!', 'success');
                 onSuccess();
             }
         } catch (err) {
-            setError('Không thể cập nhật tài khoản. Vui lòng thử lại.');
+            showToast('Không thể cập nhật tài khoản. Vui lòng thử lại!', 'error');
             console.error('Error updating account:', err);
         } finally {
             setIsLoading(false);
@@ -198,8 +149,8 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
 
     return (
         <Container>
-            <Title>{editingAccount ? 'Chỉnh sửa tài khoản' : 'Thêm tài khoản mới'}</Title>
-            <StyledForm onSubmit={editingAccount ? handleUpdate : handleSubmit}>
+            <Title>{'Chỉnh sửa tài khoản'}</Title>
+            <StyledForm onSubmit= {handleUpdate}>
                 <TextField
                     fullWidth
                     label="Tên đăng nhập"
@@ -241,7 +192,7 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
                     }
                     label={formData.status ? "Đã kích hoạt" : "Chưa kích hoạt"}
                 />
-                {error && <ErrorMessage>{error}</ErrorMessage>}
+
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                     <StyledButton
                         variant="outlined"
@@ -264,7 +215,7 @@ const CreateAccount: React.FC<Props> = ({ onSuccess, editingAccount }) => {
                         color="primary"
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Đang xử lý...' : (editingAccount ? 'Cập nhật' : 'Thêm mới')}
+                        {isLoading ? 'Đang xử lý...' : 'Cập nhật'}
                     </StyledButton>
                 </Box>
             </StyledForm>

@@ -1,27 +1,25 @@
-
-import { getCurrentUser } from '../../Utils/auth';
-import { useToast } from '../../Styles/ToastProvider';
-import styled, { keyframes } from 'styled-components';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import React, { useState, useEffect, useRef } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { useToast } from '../Styles/ToastProvider';
 import { Typography, CardContent, CardMedia, Button, Paper } from '@mui/material';
-import { SectionTitle } from '../../Styles/StylesComponents';
-import { getAllProductsAPI, addToCartAPI, getCartItemsAPI, getFavoriteProductsAPI } from '../../API';
-import { likeProductAPI, unlikeProductAPI, countProductLikesAPI, isProductLikedAPI } from '../../API';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { SectionTitle } from '../Styles/StylesComponents';
+import { getAllProductsAPI, addToCartAPI, getCartItemsAPI } from '../API';
+import { likeProductAPI, unlikeProductAPI, countProductLikesAPI, isProductLikedAPI } from '../API';
 import { useNavigate } from 'react-router-dom';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import { getCurrentUser } from '../Utils/auth';
 
-const Container = styled.div`
-  max-width: 1200px;
-  margin: 120px auto 40px;
-  padding: 20px;
+const ProductSection = styled.section`
+  padding: 40px 0;
+  background-color: #f5f5f5;
 `;
 
-const Title = styled.h2`
-  color: #1e2124;
-  margin-bottom: 30px;
-  text-align: center;
+const ProductContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 `;
 
 const rippleEffect = keyframes`
@@ -53,6 +51,7 @@ const InfoCard = styled(Paper)`
   transition: transform 0.3s ease;
   cursor: pointer;
   position: relative;
+  opacity: 0;
   
   &.animate {
     animation: ${fadeInUp} 0.6s ease forwards;
@@ -162,21 +161,13 @@ const LikeButton = styled(Button)`
   }
 `;
 
-const EmptyMessage = styled.div`
-  text-align: center;
-  padding: 40px;
-  color: #666;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-`;
-
+// Add quantity to the product interface at the top
 interface Product {
   _id: string;
   name: string;
   price: number;
-  image: string;
   quantity: number;
+  image: string;
   description: string;
 }
 
@@ -191,40 +182,68 @@ interface CartItem {
   };
 }
 
-const LikeProducts = () => {
+const Products = () => {
+  // Update useState type
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productLikes, setProductLikes] = useState<Record<string, number>>({});
+  const [likedStatus, setLikedStatus] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const user = getCurrentUser();
   const showToast = useToast();
-  const [productLikes, setProductLikes] = useState<Record<string, number>>({});
-  const [likedStatus, setLikedStatus] = useState<Record<string, boolean>>({});
-  const [likedProducts, setLikedProducts] = useState<Product[]>([]);
   const productRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [visibleMap, setVisibleMap] = useState<Record<string, boolean>>({});
 
-  const fetchFavoriteProducts = async () => {
-    try {
-      if (!user) {
-        showToast('Vui lòng đăng nhập để xem sản phẩm yêu thích', 'warning');
-        navigate('/login');
-        return;
+  useEffect(() => {
+
+    fetchProducts();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target as HTMLElement;
+          const id = el.getAttribute('data-id') || '';
+
+          if (entry.isIntersecting) {
+            // Nếu chưa visible hoặc vừa ra khỏi rồi vào lại → animate
+            if (!visibleMap[id]) {
+              el.classList.remove('animate'); // reset
+              void el.offsetWidth;
+              el.classList.add('animate');    // animate lại
+
+              setVisibleMap(prev => ({ ...prev, [id]: true }));
+            }
+          } else {
+            // Khi ra khỏi tầm nhìn hoàn toàn
+            setVisibleMap(prev => ({ ...prev, [id]: false }));
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+        rootMargin: '40px',
       }
-      const data = await getFavoriteProductsAPI(user.id);
-      setLikedProducts(data);
-    } catch (error) {
-      console.error('Error fetching favorite products:', error);
-      showToast('Không thể tải danh sách sản phẩm yêu thích', 'error');
-    }
-  };
+    );
+
+    productRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [products, visibleMap]);
 
   useEffect(() => {
-    fetchFavoriteProducts();
-  }, []);
-
-
-  useEffect(() => {
-    if (user && likedProducts.length > 0) {
+    if (user && products.length > 0) {
       fetchLikeData();
     }
-  }, [user, likedProducts]);
+  }, [user, products]);
+
+  const fetchProducts = async () => {
+    try {
+      const data = await getAllProductsAPI();
+      setProducts(data);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+  };
 
   const fetchLikeData = async () => {
     if (!user) return;
@@ -232,18 +251,18 @@ const LikeProducts = () => {
     try {
       // Get like counts for all products
       const likeCounts = await Promise.all(
-        likedProducts.map(async (likedProducts) => {
+        products.map(async (product) => {
           try {
-            const count = await countProductLikesAPI(likedProducts._id);
-            const isLiked = await isProductLikedAPI(user.id, likedProducts._id);
+            const count = await countProductLikesAPI(product._id);
+            const isLiked = await isProductLikedAPI(user.id, product._id);
             return {
-              id: likedProducts._id,
+              id: product._id,
               count: Number(count),
               isLiked
             };
           } catch (error) {
-            console.error(`Failed to get likes for product ${likedProducts._id}:`, error);
-            return { id: likedProducts._id, count: 0, isLiked: false };
+            console.error(`Failed to get likes for product ${product._id}:`, error);
+            return { id: product._id, count: 0, isLiked: false };
           }
         })
       );
@@ -265,6 +284,8 @@ const LikeProducts = () => {
       showToast('Không thể tải dữ liệu yêu thích', 'error');
     }
   };
+
+
 
   const handleLike = async (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
@@ -316,6 +337,10 @@ const LikeProducts = () => {
     }
   };
 
+  const handleViewDetail = (productId: string) => {
+    navigate(`/products/${productId}`);
+  };
+
   const handleAddToCart = async (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
 
@@ -355,17 +380,13 @@ const LikeProducts = () => {
     }
   };
 
-  const handleViewDetail = (productId: string) => {
-    navigate(`/products/${productId}`);
-  };
-
+  // In the render section, add quantity display
   return (
-    <Container>
-      <Title>Sản Phẩm Yêu Thích</Title>
-
-      {likedProducts.length > 0 ? (
+    <ProductSection>
+      <ProductContainer>
+        <SectionTitle>SẢN PHẨM NỔI BẬT</SectionTitle>
         <ProductGrid>
-          {likedProducts.map((product, index) => (
+          {products.map((product, index) => (
             <InfoCard
               elevation={2}
               key={product._id}
@@ -420,13 +441,9 @@ const LikeProducts = () => {
             </InfoCard>
           ))}
         </ProductGrid>
-      ) : (
-        <EmptyMessage>
-          Bạn chưa có sản phẩm yêu thích nào
-        </EmptyMessage>
-      )}
-    </Container>
+      </ProductContainer>
+    </ProductSection>
   );
 };
 
-export default LikeProducts;
+export default Products;

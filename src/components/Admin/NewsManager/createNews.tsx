@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from '../../Styles/ToastProvider';
 import styled from 'styled-components';
 import {
   TextField,
@@ -44,8 +45,7 @@ const CreateNews: React.FC<CreateNewsProps> = ({ selectedNews, onSuccess }) => {
   });
   const [image, setImage] = useState<File | null>(null);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const showToast = useToast();
 
   useEffect(() => {
     if (selectedNews) {
@@ -94,17 +94,16 @@ const CreateNews: React.FC<CreateNewsProps> = ({ selectedNews, onSuccess }) => {
 
       if (selectedNews) {
         await updateNewsAPI(selectedNews._id, newsData);
-        setSuccess('Cập nhật tin tức thành công!');
-        // Return to edit tab immediately after successful update
+        showToast('Cập nhật tin tức thành công!', 'success');
         onSuccess();
       } else {
         await createNewsAPI(newsData);
-        setSuccess('Thêm tin tức mới thành công!');
+        showToast('Thêm tin tức mới thành công!', 'success');
         onSuccess();
       }
 
     } catch (error) {
-      setError('Có lỗi xảy ra. Vui lòng thử lại!');
+      showToast('Có lỗi xảy ra. Vui lòng thử lại!', 'error');
     }
   };
 
@@ -113,9 +112,6 @@ const CreateNews: React.FC<CreateNewsProps> = ({ selectedNews, onSuccess }) => {
       <Typography variant="h5" sx={{ mb: 4, color: '#e31837', fontWeight: 'bold' }}>
         {selectedNews ? "Chỉnh sửa tin tức" : "Thêm tin tức mới"}
       </Typography>
-
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
       <form onSubmit={handleSubmit}>
         <StyledTextField

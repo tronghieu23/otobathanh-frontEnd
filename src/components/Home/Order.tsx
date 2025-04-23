@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../Utils/auth';
-import { getCartItemsAPI, createOrderAPI, addOrderDetailAPI } from '../API';
+import { getCartItemsAPI, createOrderAPI } from '../API';
+import { useToast } from '../Styles/ToastProvider';
 
 const OrderContainer = styled.div`
   max-width: 1200px;
@@ -128,7 +129,7 @@ const Order = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const showToast = useToast();
   const [formData, setFormData] = useState({
     fullName: user?.name || '',
     email: user?.email || '',
@@ -142,7 +143,6 @@ const Order = () => {
       if (user?.id) {
         try {
           setIsLoading(true);
-          setError('');
           const items = await getCartItemsAPI(user.id);
           setCartItems(items);
           const total = items.reduce((sum: number, item: CartItem) => {
@@ -152,7 +152,7 @@ const Order = () => {
           }, 0);
           setTotalAmount(Math.round(total));
         } catch (error) {
-          setError('Failed to load cart items. Please try again.');
+          showToast('Không tải được giỏ hàng. Vui lòng thử lại!', 'error');
           console.error('Error fetching cart items:', error);
         } finally {
           setIsLoading(false);
@@ -169,10 +169,9 @@ const Order = () => {
 
     try {
       setIsLoading(true);
-      setError('');
 
       if (cartItems.length === 0) {
-        setError('Your cart is empty');
+        showToast('Giỏ hàng đang trống!', 'error');
         return;
       }
 
@@ -189,7 +188,7 @@ const Order = () => {
       await createOrderAPI(orderData);
 
     } catch (error) {
-      setError('Failed to create order. Please try again.');
+      showToast('Đặt hàng không thành công. Vui lòng thử lại sau!', 'error');
       console.error('Error creating order:', error);
     } finally {
       setIsLoading(false);
@@ -214,7 +213,6 @@ const Order = () => {
   return (
     <OrderContainer>
       <OrderTitle>Thông tin đặt hàng</OrderTitle>
-      {error && <ErrorMessage>{error}</ErrorMessage>}
       <OrderForm onSubmit={handleSubmit}>
         <FormGroup>
           <Label>Họ và tên</Label>

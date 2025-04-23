@@ -6,6 +6,7 @@ import { DialogContent, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { useToast } from '../../Styles/ToastProvider';
 
 const DialogHeader = styled.div`
   display: flex;
@@ -104,24 +105,20 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onClose }) => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const showToast = useToast();
     const [step, setStep] = useState<'email' | 'reset'>('email');
-    const navigate = useNavigate();
 
     const handleRequestCode = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
         setIsLoading(true);
 
         try {
-            const response = await forgotPasswordAPI(email);
-            setSuccess(response.message);
+            await forgotPasswordAPI(email);
             setStep('reset');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+            showToast('Có lỗi xảy ra vui lòng thử lại sau!', 'error');
+            console.error(err);
         } finally {
             setIsLoading(false);
         }
@@ -129,11 +126,9 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onClose }) => {
 
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
 
         if (newPassword !== confirmPassword) {
-            setError('Mật khẩu xác nhận không khớp');
+            showToast('Mật khẩu xác nhận không khớp!', 'error');
             return;
         }
 
@@ -141,9 +136,10 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onClose }) => {
 
         try {
             const response = await resetPasswordAPI(email, verificationCode, newPassword);
-            setSuccess('Mật khẩu đã được đặt lại thành công.');
+            showToast('Mật khẩu được đặt lại thành công!', 'success');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+            showToast('Có lỗi xảy ra vui lòng thử lại sau!', 'error');
+            console.error(err);
         } finally {
             setIsLoading(false);
         }
@@ -171,9 +167,6 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onClose }) => {
                                 required
                             />
                         </InputField>
-
-                        {error && <ErrorMessage>{error}</ErrorMessage>}
-                        {success && <SuccessMessage>{success}</SuccessMessage>}
 
                         <SubmitButton type="submit" $loading={isLoading}>
                             {isLoading ? 'Đang xử lý...' : 'Gửi mã xác nhận'}
@@ -213,9 +206,6 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onClose }) => {
                                 required
                             />
                         </InputField>
-
-                        {error && <ErrorMessage>{error}</ErrorMessage>}
-                        {success && <SuccessMessage>{success}</SuccessMessage>}
 
                         <SubmitButton type="submit" $loading={isLoading}>
                             {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}

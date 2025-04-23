@@ -8,6 +8,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 import { verifyAccountAPI } from '../../API';
+import { useToast } from '../../Styles/ToastProvider';
 
 const StyledDialog = styled(Dialog)`
   .MuiDialog-paper {
@@ -100,13 +101,12 @@ interface VerifyAccountFormProps {
 const VerifyAccountForm: React.FC<VerifyAccountFormProps> = ({ open, onClose, email }) => {
   const navigate = useNavigate();
   const [verificationCode, setVerificationCode] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const showToast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const response = await verifyAccountAPI(email, verificationCode);
@@ -119,9 +119,9 @@ const VerifyAccountForm: React.FC<VerifyAccountFormProps> = ({ open, onClose, em
     } catch (error: any) {
       console.error('Verification error:', error);
       if (error.response?.data?.message) {
-        setError(error.response.data.message);
+        console.error('Verification error:', error.response.data.message);
       } else {
-        setError('Có lỗi xảy ra khi xác thực tài khoản');
+        showToast('Có lỗi xảy ra khi xác thực tài khoản!', 'error');
       }
     } finally {
       setLoading(false);
@@ -154,8 +154,6 @@ const VerifyAccountForm: React.FC<VerifyAccountFormProps> = ({ open, onClose, em
               required
             />
           </InputField>
-
-          {error && <ErrorMessage>{error}</ErrorMessage>}
 
           <VerifyButton type="submit" $loading={loading}>
             {loading ? 'ĐANG XỬ LÝ...' : 'XÁC THỰC'}

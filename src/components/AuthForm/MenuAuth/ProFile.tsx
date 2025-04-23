@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { getAccountByIdAPI } from '../../API';
 import { getCurrentUser } from '../../Utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../../Styles/ToastProvider';
 
 const Container = styled.div`
   max-width: 800px;
@@ -87,7 +88,7 @@ const Profile = () => {
     createdAt: '',
   }));
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const showToast = useToast();
 
   useEffect(() => {
     const fetchAccountData = async () => {
@@ -110,7 +111,8 @@ const Profile = () => {
           }
         }
       } catch (err: any) {
-        setError('Không thể tải thông tin tài khoản');
+        showToast('Không thể tải thông tin tài khoản!', 'error');
+        console.error('Error fetching account data:', err); 
       } finally {
         setIsLoading(false);
       }
@@ -195,8 +197,6 @@ const Profile = () => {
             disabled
           />
         </FormGroup>
-
-        {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <Button type="button" onClick={handleUpdateClick}>
           Cập nhật thông tin

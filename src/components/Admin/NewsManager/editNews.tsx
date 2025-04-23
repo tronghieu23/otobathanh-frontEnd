@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useToast } from '../../Styles/ToastProvider';
 import {
   IconButton,
   Table,
@@ -46,6 +47,20 @@ const SearchInput = styled.input`
   }
 `;
 
+// Add styled components for the search controls
+const SearchControls = styled.div`
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  `;
+
+const SearchSelect = styled.select`
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  `;
+
 const StyledTableContainer = styled(TableContainer)`
   margin-top: 20px;
   
@@ -76,7 +91,7 @@ const EditNews: React.FC<Props> = ({ onEdit }) => {
   const [news, setNews] = useState<News[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const showToast = useToast();
 
   useEffect(() => {
     fetchNews();
@@ -89,10 +104,10 @@ const EditNews: React.FC<Props> = ({ onEdit }) => {
       if (Array.isArray(response)) {
         setNews(response);
       } else {
-        setError('Dữ liệu không hợp lệ');
+        showToast('Dữ liệu không hợp lệ!', 'error');
       }
     } catch (err) {
-      setError('Không thể tải danh sách tin tức');
+      showToast('Không thể tải danh sách tin tức!', 'error');
       console.error('Error fetching news:', err);
     } finally {
       setIsLoading(false);
@@ -108,9 +123,9 @@ const EditNews: React.FC<Props> = ({ onEdit }) => {
       try {
         await deleteNewsAPI(newsId);
         setNews(news.filter(n => n._id !== newsId));
-        alert('Xóa tin tức thành công!');
+        showToast('Xóa tin tức thành công!', 'success');
       } catch (err) {
-        setError('Không thể xóa tin tức');
+        showToast('Không thể xóa tin tức!', 'error');
         console.error('Error deleting news:', err);
       }
     }
@@ -119,20 +134,6 @@ const EditNews: React.FC<Props> = ({ onEdit }) => {
   // Add these new states after existing useState declarations
   const [searchType, setSearchType] = useState('title'); // 'title' or 'content'
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-  // Add styled components for the search controls
-  const SearchControls = styled.div`
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  `;
-
-  const SearchSelect = styled.select`
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-  `;
 
   // Update the filteredNews logic
   const filteredAndSortedNews = news

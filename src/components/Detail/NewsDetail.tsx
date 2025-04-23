@@ -110,7 +110,6 @@ const NewsPage = () => {
         }
       } catch (error) {
         console.error('Error fetching news:', error);
-        navigate('/news');
       }
     };
 

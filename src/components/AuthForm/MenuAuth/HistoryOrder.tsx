@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { getOrdersByAccountAPI, deleteOrderAPI } from '../../API';
 import { getCurrentUser } from '../../Utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../../Styles/ToastProvider';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -71,7 +72,7 @@ const HistoryOrder = () => {
   const user = getCurrentUser();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const showToast = useToast();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -83,7 +84,7 @@ const HistoryOrder = () => {
         }
       } catch (err) {
         console.error('Error fetching orders:', err);
-        setError('Không thể tải lịch sử đơn hàng');
+        showToast('Không thể tải lịch sử đơn hàng!', 'error');
       } finally {
         setLoading(false);
       }
@@ -98,7 +99,7 @@ const HistoryOrder = () => {
         await deleteOrderAPI(orderId);
         setOrders(orders.filter((order: any) => order._id !== orderId));
       } catch (err) {
-        setError('Không thể xóa đơn hàng');
+        showToast('Không thể xóa đơn hàng!', 'error');
       }
     }
   };
@@ -159,8 +160,7 @@ const HistoryOrder = () => {
       ) : (
         <EmptyMessage>Chưa có đơn hàng nào</EmptyMessage>
       )}
-
-      {error && <EmptyMessage style={{ color: '#e31837' }}>{error}</EmptyMessage>}
+      
     </Container>
   );
 };

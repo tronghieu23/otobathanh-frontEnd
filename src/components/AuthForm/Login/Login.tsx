@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useToast } from '../../Styles/ToastProvider';
 import styled from 'styled-components';
 import {
   Dialog,
@@ -168,12 +169,12 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
   const navigate = useNavigate();
+  const showToast = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,13 +183,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
       ...prev,
       [name]: value
     }));
-    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const response = await loginAPI(formData.email, formData.password);
@@ -211,7 +210,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
         throw new Error(response.message || 'Đăng nhập thất bại');
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng nhập');
+      showToast('Có lỗi khi đăng nhập!', 'error');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -239,7 +239,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
             value={formData.email}
             onChange={handleChange}
             required
-            error={!!error}
           />
           <PasswordWrapper>
             <StyledTextField
@@ -250,17 +249,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ open, onClose }) => {
               value={formData.password}
               onChange={handleChange}
               required
-              error={!!error}
             />
             <VisibilityButton onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
             </VisibilityButton>
           </PasswordWrapper>
-          {error && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
           <ForgotPassword onClick={() => {/* Handle forgot password */ }}>
             Quên mật khẩu?
           </ForgotPassword>

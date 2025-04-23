@@ -4,6 +4,7 @@ import { getAccountByIdAPI, loginAPI } from '../../API';
 import { getCurrentUser } from '../../Utils/auth';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useToast } from '../../Styles/ToastProvider';
 
 const Container = styled.div`
   max-width: 600px;
@@ -92,9 +93,8 @@ const ChangePass = () => {
     newPassword: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isVerified, setIsVerified] = useState(false);
+  const showToast = useToast();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -106,7 +106,7 @@ const ChangePass = () => {
           }
         }
       } catch (err) {
-        setError('Không thể tải thông tin người dùng');
+        showToast('Không thể tải thông tin người dùng!', 'error');
       }
     };
 
@@ -115,11 +115,9 @@ const ChangePass = () => {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
     if (!formData.email || !formData.oldPassword) {
-      setError('Vui lòng nhập đầy đủ thông tin');
+      showToast('Vui lòng nhập đấy đủ thông tin!', 'error');
       return;
     }
 
@@ -129,20 +127,18 @@ const ChangePass = () => {
 
       if (response) {
         setIsVerified(true);
-        setSuccess('Xác thực thành công. Vui lòng nhập mật khẩu mới.');
+        showToast('Xác thực thành công vui lòng nhập mật khẩu mới!', 'success');
       }
     } catch (err) {
-      setError('Email hoặc mật khẩu không chính xác');
+      showToast('Email hoặc mật khẩu không chính xác!', 'error');
     }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setError('Mật khẩu mới không khớp');
+      showToast('Mật khẩu mới không khớp!', 'error');
       return;
     }
 
@@ -152,13 +148,13 @@ const ChangePass = () => {
       });
 
       if (response.data) {
-        setSuccess('Đổi mật khẩu thành công');
+        showToast('Đổi mật khẩu thành công!', 'success');
         setTimeout(() => {
           navigate('/account/profile');
         }, 2000);
       }
     } catch (err) {
-      setError('Không thể đổi mật khẩu');
+      showToast('Không thể đổi mật khẩu!', 'error');
     }
   };
 
@@ -220,9 +216,6 @@ const ChangePass = () => {
             </FormGroup>
           </>
         )}
-
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        {success && <SuccessMessage>{success}</SuccessMessage>}
 
         <Button type="submit">
           {isVerified ? 'Đổi mật khẩu' : 'Xác thực'}

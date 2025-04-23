@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { NavLink as RouterNavLink } from 'react-router-dom';
+import SearchIcon from '@mui/icons-material/Search';
 import LoginForm from '../AuthForm/Login/Login';
 import RegisterForm from '../AuthForm/Register/Register';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -9,16 +10,18 @@ import { getCurrentUser, handleLogout } from '../Utils/auth';
 import { getAccountByIdAPI, getCartItemsAPI, removeFromCartAPI } from '../API';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useNavigate } from 'react-router-dom';
+import InputBase from '@mui/material/InputBase';
 
 const HeaderContainer = styled.header`
-  background-color: #1e2124;
+  background: linear-gradient(to right, rgb(246, 238, 238), rgb(242, 12, 12) 50%, rgb(11, 9, 9));
+  backdrop-filter: blur(8px);
   padding: 5px 0;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 
   @media (max-width: 768px) {
     padding: 8px 0;
@@ -91,7 +94,8 @@ border: 2px solid #e31837;
 `;
 
 const Logo = styled.img`
-  height: 90px;
+  height: 70px;
+  margin: 10px 0;
   object-fit: contain;
   
   @media (max-width: 768px) {
@@ -113,6 +117,7 @@ const NavContainer = styled.div`
 const NavLinks = styled.nav<{ $isOpen: boolean }>`
   display: flex;
   align-items: center;
+  font-size: 20px;
   gap: 30px;
 
   @media (max-width: 768px) {
@@ -142,11 +147,11 @@ const NavLink = styled(RouterNavLink)`
   transition: color 0.3s ease;
 
   &:hover {
-    color: #e31837;
+    color:rgb(22, 18, 19);
   }
 
   &.active {
-    color: #e31837;
+    color:rgb(229, 229, 245);
     
     &:after {
       content: '';
@@ -289,8 +294,6 @@ const MobileNav = styled.div`
   }
 `;
 
-// Update UserDropdown component to handle hover
-// First, define DropdownContent before UserDropdown
 const DropdownContent = styled.div<{ $isOpen: boolean }>`
   display: none;
   position: absolute;
@@ -320,7 +323,6 @@ const ManagerDropdown = styled.div`
   }
 `;
 
-// Then define UserDropdown that references DropdownContent
 const UserDropdown = styled.div`
   position: relative;
   display: inline-block;
@@ -341,6 +343,7 @@ const DropdownItem = styled(NavLink)`
   text-decoration: none;
   display: block;
   transition: all 0.3s ease;
+  font-size: 14px;
   
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
@@ -485,6 +488,8 @@ const Header = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -498,7 +503,7 @@ const Header = () => {
         console.error('Error fetching cart items:', error);
       }
     };
-  
+
     const fetchUserData = async () => {
       try {
         if (user?.id) {
@@ -516,10 +521,23 @@ const Header = () => {
         console.error('Error fetching user data:', error);
       }
     };
-  
+
     fetchCartItems();
     fetchUserData();
   }, [user]); // Add user as dependency
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const removeCartItem = async (e: React.MouseEvent, itemId: string) => {
     e.stopPropagation();
@@ -541,7 +559,37 @@ const Header = () => {
         <MenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
           {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
         </MenuButton>
-
+        <div
+          ref={searchRef}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            borderRadius: '20px',
+            padding: '5px 10px',
+            transition: 'width 0.4s ease',
+            width: isSearchExpanded ? '350px' : '40px',
+            overflow: 'hidden',
+            cursor: 'pointer',
+          }}
+          onClick={() => setIsSearchExpanded(true)}
+        >
+          <SearchIcon style={{ color: '#fff' }} />
+          {isSearchExpanded && (
+            <InputBase
+              autoFocus
+              placeholder="Bạn muốn tìm gì?"
+              sx={{
+                marginLeft: 1,
+                color: 'white',
+                flex: 1,
+                '& input::placeholder': {
+                  color: 'rgba(255,255,255,0.6)',
+                },
+              }}
+            />
+          )}
+        </div>
         <NavContainer>
           <NavLinks $isOpen={false}>
             <NavLink to="/" end>
