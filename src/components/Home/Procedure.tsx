@@ -1,5 +1,5 @@
 import React from 'react';
-import '../Css/Procedure.css';
+import '../css/Procedure.css';
 import { useState, useEffect } from 'react';
 
 interface Step {
@@ -41,11 +41,11 @@ const steps: Step[] = [
 ];
 
 const images = [
-  '/image/procedure.jpg',
-  '/image/procedure1.jpg',
-  '/image/procedure2.jpg',
-  '/image/procedure3.jpg',
-  '/image/procedure4.jpg',
+  '/image/xecuuhoa.png',
+  '/image/xecsgt.jpg',
+  '/image/xecuuhoa.png',
+  '/image/xecuuthuong.png',
+  '/image/thuyencano.jpg',
 ];
 
 const WorkProcess: React.FC = () => {
